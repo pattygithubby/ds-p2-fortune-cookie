@@ -1,0 +1,15 @@
+# The website. A Service only routes to ready pods, and only the leader passes the
+# readiness probe, so all user traffic goes to the elected leader.
+apiVersion: v1
+kind: Service
+metadata:
+  name: fortune-web
+spec:
+  type: NodePort
+  selector:
+    app: fortune-cookie
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP

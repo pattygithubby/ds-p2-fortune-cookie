@@ -6,7 +6,7 @@ Guidance for Claude Code when working in this repository. The full assignment te
 
 A fortune cookie website hosted on Kubernetes. Multiple pods run the same app and use the **Bully algorithm** to elect a leader pod; the leader serves the website. If the leader fails, the remaining pods must elect a new one via the algorithm.
 
-Started from the template at https://github.com/thecml/bully-in-kubernetes.
+Started from the template at https://github.com/thecml/bully-in-kubernetes; the template code has been replaced (see below).
 
 ## Requirements
 
@@ -25,30 +25,32 @@ The report must explain design decisions and implementation, and include two exp
 
 ## Repository layout
 
-- [bully/](bully) — the Bully election package, copied from our P1 project (`ds-p1-bully-election`). Standard library only, Python 3.12+. Contains the original Garcia-Molina algorithm ([original.py](bully/original.py)) and our improved variant with fewer messages ([improved.py](bully/improved.py)), selected with `BULLY_ALGORITHM` (default `improved`). Nodes talk over UDP port 9000. On Kubernetes the node id comes from the StatefulSet pod name (`bully-0` is node 1). [\_\_main\_\_.py](bully/__main__.py) shows the run loop and the `BULLY_*` environment variables. The algorithm is described in [docs/bully-ref.md](docs/bully-ref.md).
-- [tests/](tests) — P1's tests for the package (`python3 -m pytest`, about 12 s). Keep them passing if `bully/` changes.
-- [app.py](app.py) — still the unchanged template: aiohttp server and a placeholder Bully task. It is not wired to `bully/` yet.
-- [k8s/deployment.yaml](k8s/deployment.yaml) — Deployment (`bully-app`, 2 replicas, local image, `imagePullPolicy: Never`). Injects `WEB_PORT=8080` and `POD_IP` (from `status.podIP`).
-- [k8s/headless-service.yaml](k8s/headless-service.yaml) — headless Service `bully-service` (`clusterIP: None`, port 80 → 8080), used for pod discovery.
-- [Dockerfile](Dockerfile) — Python 3.12 image, runs `app.py`, exposes 8080.
-- [requirements.txt](requirements.txt) — `aiohttp`, `requests`.
+`src/` layout, two packages that only meet in one adapter:
 
-## How the template works
-
-- Each pod picks a random `POD_ID` (0–100) at startup and reads its own IP from `POD_IP`.
-- `run_bully()` runs periodically: it does a DNS lookup on `bully-service` to get all pod IPs, removes its own IP, then calls `GET /pod_id` on each other pod and stores the IDs in a dict.
-- Endpoints: `GET /pod_id` (implemented), and stubs for `POST /receive_election`, `POST /receive_answer`, `POST /receive_coordinator` — the Bully algorithm goes here.
-- Peer requests currently use the synchronous `requests` library, which blocks the event loop. Prefer `aiohttp.ClientSession` for async requests (https://docs.aiohttp.org/en/stable/client_quickstart.html).
+- [src/bully/](src/bully) — the Bully election library, copied unchanged from our P1 project (`ds-p1-bully-election`). Standard library only, Python 3.12+. Has the original Garcia-Molina algorithm ([original.py](src/bully/original.py)) and our improved variant with fewer messages ([improved.py](src/bully/improved.py)), chosen with `BULLY_ALGORITHM` (default and recommended: `improved`). Nodes talk over UDP port 9000. On Kubernetes the node id comes from the StatefulSet pod name (`bully-0` is node 1). [\_\_main\_\_.py](src/bully/__main__.py) has `Config.from_env`, `build()` and `serve()` and documents the `BULLY_*` variables. The algorithm is described in [docs/bully-ref.md](docs/bully-ref.md). Treat it as a library: don't put website code in it.
+- [src/fortune/](src/fortune) — the website. Currently stubs (`NotImplementedError`) with the planned design in each docstring.
+  - [config.py](src/fortune/config.py) — web settings from the environment (`WEB_PORT`, `LOG_LEVEL`).
+  - [election.py](src/fortune/election.py) — `LeaderElection`, the only module that imports `bully`: runs the node in a background thread and exposes `is_leader()` / `leader_id()`.
+  - [fortunes.py](src/fortune/fortunes.py) — `FortuneSource`, reads [data/fortunes.txt](src/fortune/data/fortunes.txt).
+  - [web/app.py](src/fortune/web/app.py) — `create_app(fortunes, election)`; routes `/`, `/api/fortune`, `/healthz`, `/leader`. Static page in [web/static/](src/fortune/web/static).
+  - [\_\_main\_\_.py](src/fortune/__main__.py) — `python -m fortune`, the container entry point.
+- [tests/bully/](tests/bully) — P1's tests (keep them passing). [tests/fortune/](tests/fortune) — tests for the website.
+- [deploy/k8s/](deploy/k8s) — kustomize: StatefulSet `bully` (3 replicas; `BULLY_N` must equal `replicas`), headless Service `bully` (UDP 9000, `publishNotReadyAddresses: true`), and NodePort Service `fortune-web`. Plan: a readiness probe on `/leader` so `fortune-web` only routes to the leader (probe is commented out until the endpoint exists).
+- [loadtest/](loadtest), [experiments/](experiments) — the two report experiments (placeholders).
+- [docs/](docs) — assignment, Bully paper notes, `report/`.
 
 ## Build and run
 
+Dependencies live in a gitignored `.venv` (`python3 -m venv .venv`, then `source .venv/bin/activate`). Activate it before running anything; the system Python has no `aiohttp`.
+
 ```sh
-docker build -t bully-app .
-kubectl apply -f k8s/headless-service.yaml
-kubectl apply -f k8s/deployment.yaml
+make install   # pip install -e '.[dev]'
+make test      # python3 -m pytest (pytest finds src/ via pythonpath in pyproject.toml)
+make build     # docker build -t fortune-cookie .
+make deploy    # kubectl apply -k deploy/k8s
 ```
 
-The deployment uses a local image. To use Docker Hub instead, change the image and set it to pull on every deploy (https://kubernetes.io/docs/concepts/containers/images/).
+The StatefulSet uses a local image (`imagePullPolicy: IfNotPresent`); load it into the cluster first (e.g. `kind load docker-image fortune-cookie`). To use Docker Hub instead, change the image and pull policy (https://kubernetes.io/docs/concepts/containers/images/).
 
 ## Useful references
 

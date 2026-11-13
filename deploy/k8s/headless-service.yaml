@@ -1,0 +1,16 @@
+# Peer discovery for the Bully election: gives every pod a stable DNS name,
+# bully-<ordinal>.bully. publishNotReadyAddresses keeps followers (which are never
+# ready, see the readiness probe) reachable by the other nodes.
+apiVersion: v1
+kind: Service
+metadata:
+  name: bully
+spec:
+  clusterIP: None
+  publishNotReadyAddresses: true
+  selector:
+    app: fortune-cookie
+  ports:
+    - name: election
+      port: 9000
+      protocol: UDP

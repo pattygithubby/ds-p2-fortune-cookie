@@ -1,28 +1,20 @@
-# Using official python runtime base image
-FROM python:3.12
+FROM python:3.12-slim
 
-# Set the app directory
 WORKDIR /app
 
-# Upgrade pip
-RUN pip install --upgrade pip
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONIOENCODING=UTF-8 \
+    PIP_NO_CACHE_DIR=1
 
-# Copy requirements to container and install
-COPY requirements.txt requirements.txt
+# Install dependencies first so this layer is cached between code changes
+COPY requirements.txt .
 RUN pip install -r requirements.txt
- 
-# Upgrade pip
-RUN pip install --upgrade pip
 
-# Copy all to current dir
-COPY . .
+COPY pyproject.toml .
+COPY src/ src/
+RUN pip install --no-deps .
 
-# Make port 8080 available for api
-EXPOSE 8080
+# 8080: website (TCP), 9000: Bully election (UDP)
+EXPOSE 8080 9000/udp
 
-# This will print python logs to output
-ENV PYTHONUNBUFFERED=1
-ENV PYTHONIOENCODING=UTF-8
-
-# Define the command to be run when launching the container
-CMD ["python", "-u", "./app.py"]
+CMD ["python", "-m", "fortune"]

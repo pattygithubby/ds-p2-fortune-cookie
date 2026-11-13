@@ -1,0 +1,54 @@
+# Pod bully-<ordinal> is Bully node <ordinal + 1> (see src/bully/__main__.py).
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: bully
+spec:
+  serviceName: bully
+  replicas: 3
+  podManagementPolicy: Parallel
+  selector:
+    matchLabels:
+      app: fortune-cookie
+  template:
+    metadata:
+      labels:
+        app: fortune-cookie
+    spec:
+      containers:
+        - name: fortune
+          image: fortune-cookie
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: WEB_PORT
+              value: "8080"
+            - name: BULLY_ALGORITHM
+              value: improved
+            - name: BULLY_N
+              value: "3"          # must equal replicas
+            - name: BULLY_PEERS
+              value: "bully-{ord}.bully:9000"
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+            - name: election
+              containerPort: 9000
+              protocol: UDP
+          # TODO: enable once /healthz and /leader exist (src/fortune/web/app.py).
+          # livenessProbe:
+          #   httpGet: {path: /healthz, port: http}
+          # readinessProbe:
+          #   httpGet: {path: /leader, port: http}
+          #   periodSeconds: 1
+          volumeMounts:
+            - name: state
+              mountPath: /data
+  volumeClaimTemplates:
+    - metadata:
+        name: state
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 10Mi
