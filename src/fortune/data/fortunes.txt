@@ -3,3 +3,38 @@ You will find a thing. It may be important.
 The leader you seek is the one with the highest id.
 Good things come to those who wait for a timeout.
 Today is a good day to try something new.
+A quiet answer is still an answer. Silence, after T seconds, is not.
+You will soon be elected to something. Try to stay up.
+Your patience will be rewarded, probably within three retries.
+A small kindness today returns to you as a large one tomorrow.
+The best time to plant a tree was twenty years ago. The second best time is now.
+Someone is thinking of you. They are waiting for your acknowledgement.
+Every crash is a chance to recover with a clean state.
+You are stronger than the last failure you survived.
+An unexpected message will brighten your afternoon.
+Do not fear the higher node. It, too, can fail.
+Fortune favors those who write things down in safe storage.
+A friend asks only for your time, not your money.
+Your hard work is about to pay off. Keep your heartbeat steady.
+The cookie is not the fortune. The fortune is not the cookie.
+Two nodes that agree are better than three that argue.
+You will take a pleasant trip in the near future.
+Simplicity is the ultimate sophistication.
+When in doubt, hold an election.
+A new perspective will come with the new season.
+He who halts the others must also tell them why.
+Your ability to listen is your greatest strength.
+Happiness is a short round trip time.
+Now is the time to try something you have never done.
+Even the strongest leader is replaced when it stops answering.
+You will be hungry again in one hour.
+Help! I'm being held prisoner in a Kubernetes cluster.
+The answer you seek is cached somewhere. Do not trust it.
+Believe in yourself, and others will too.
+A pleasant surprise is waiting for you in your logs.
+Small steps every day add up to great distances.
+You will receive a reply. Eventually.
+Good news will come to you from far away, over UDP.
+The early bird gets the worm, but the second mouse gets the cheese.
+Every ending is a new leader election.
+Your curiosity will lead you somewhere worth going.

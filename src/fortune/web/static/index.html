@@ -1,14 +1,170 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Fortune Cookie</title>
-  <link rel="stylesheet" href="/static/style.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fortune Cookie</title>
+<meta name="description" content="Break open a fortune cookie, served by the elected leader of a small Kubernetes cluster.">
+<meta name="color-scheme" content="light dark">
+<script>
+  /* Set the theme and style before first paint so nothing flashes. */
+  (function () {
+    var t = null, s = null;
+    try { t = localStorage.getItem("fortune-theme"); s = localStorage.getItem("fortune-style"); } catch (e) {}
+    if (t !== "light" && t !== "dark") {
+      t = window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    }
+    document.documentElement.setAttribute("data-theme", t);
+    if (s === "festive") document.documentElement.setAttribute("data-style", "festive");
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,560;1,9..144,400&display=swap">
+<!-- Brush calligraphy for the Chinese style, subset to the five characters the page uses -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&text=%E7%A6%8F%E5%B9%B8%E8%BF%90%E9%A5%BC%E5%B9%B2&display=swap">
+<link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-  <!-- Placeholder: cookie, fortune text and a "get another" button go here. -->
-  <main id="fortune"></main>
-  <script src="/static/app.js"></script>
+<div class="toolbar">
+  <button class="tool-btn style-toggle" id="style-toggle" type="button" aria-pressed="false"
+          aria-label="Chinese style" title="Chinese style">
+    <svg class="icon icon-lantern" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M12 1.8v2.6M9.2 4.4h5.6M9.2 17.6h5.6M12 17.6v2.2M10.6 21.8l1.4-2 1.4 2"/>
+      <ellipse cx="12" cy="11" rx="6.4" ry="6.6"/>
+      <path d="M12 4.4c-2.6 1.8-2.6 11.4 0 13.2M12 4.4c2.6 1.8 2.6 11.4 0 13.2"/>
+    </svg>
+  </button>
+  <button class="tool-btn theme-toggle" id="theme-toggle" type="button" aria-pressed="false" aria-label="Night mode">
+    <svg class="icon icon-sun" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <circle cx="12" cy="12" r="4.2"/>
+      <path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/>
+    </svg>
+    <svg class="icon icon-moon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M19.5 14.6A7.8 7.8 0 0 1 9.4 4.5a7.8 7.8 0 1 0 10.1 10.1Z"/>
+    </svg>
+  </button>
+</div>
+
+<!-- Chinese style only: two hanging lanterns, drawn once and reused -->
+<div class="lanterns" aria-hidden="true">
+  <svg class="lantern lantern-l" viewBox="0 0 80 150" focusable="false">
+    <defs>
+      <radialGradient id="g-lantern" cx="0.38" cy="0.36" r="0.75">
+        <stop offset="0" class="ls-hi"/>
+        <stop offset="0.6" class="ls-mid"/>
+        <stop offset="1" class="ls-lo"/>
+      </radialGradient>
+      <g id="lantern-shape">
+        <path class="l-cord" d="M40 0v24"/>
+        <rect class="l-cap" x="25" y="23" width="30" height="8" rx="2"/>
+        <ellipse class="l-body" cx="40" cy="61" rx="34" ry="31" fill="url(#g-lantern)"/>
+        <ellipse class="l-rib" cx="40" cy="61" rx="22" ry="31"/>
+        <ellipse class="l-rib" cx="40" cy="61" rx="9" ry="31"/>
+        <rect class="l-cap" x="25" y="91" width="30" height="8" rx="2"/>
+        <path class="l-cord" d="M40 99v8"/>
+        <circle class="l-knot" cx="40" cy="108" r="3.2"/>
+        <path class="l-tassel" d="M34.5 111h11l2.5 32h-16Z"/>
+      </g>
+    </defs>
+    <use href="#lantern-shape"/>
+  </svg>
+  <svg class="lantern lantern-r" viewBox="0 0 80 150" focusable="false">
+    <use href="#lantern-shape"/>
+  </svg>
+</div>
+
+<main class="card">
+  <div class="corners" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+  <header class="masthead">
+    <p class="eyebrow">Freshly baked, one at a time</p>
+    <h1 class="title">Fortune Cookie</h1>
+    <p class="cn-title" lang="zh-Hans" aria-hidden="true">幸运饼干</p>
+    <div class="rule" aria-hidden="true"><span></span></div>
+  </header>
+
+  <div class="stage is-shut" id="stage">
+    <div class="cookie" aria-hidden="true">
+      <svg viewBox="0 0 320 230" focusable="false">
+        <defs>
+          <radialGradient id="g-left" cx="0.36" cy="0.3" r="0.85">
+            <stop offset="0" class="s-hi"/>
+            <stop offset="0.55" class="s-mid"/>
+            <stop offset="1" class="s-lo"/>
+          </radialGradient>
+          <radialGradient id="g-right" cx="0.3" cy="0.32" r="0.9">
+            <stop offset="0" class="s-hi"/>
+            <stop offset="0.5" class="s-mid"/>
+            <stop offset="1" class="s-deep"/>
+          </radialGradient>
+          <radialGradient id="g-shadow" cx="0.5" cy="0.5" r="0.5">
+            <stop offset="0" class="s-shadow"/>
+            <stop offset="1" class="s-shadow" stop-opacity="0"/>
+          </radialGradient>
+          <!-- One half, drawn once; the right half is its mirror image. -->
+          <path id="p-body" d="M160 34C118 22 66 32 40 66 20 92 16 136 26 168c6 18 16 32 30 36 10 2 16-4 20-12 20-32 50-50 84-46L166 122 159 98 167 74 161 54Z"/>
+          <path id="p-curl" d="M62 170c22-34 58-58 98-52v16c-36-6-66 14-84 48Z"/>
+          <path id="p-lip" d="M76 192c20-32 50-50 84-46v-11c-38-4-70 16-92 48 2 5 5 8 8 9Z"/>
+          <g id="half">
+            <use href="#p-body" class="body"/>
+            <use href="#p-curl" class="curl"/>
+            <use href="#p-lip" class="lip"/>
+            <path class="ridge" d="M60 66c24-22 60-30 92-26"/>
+            <g class="specks">
+              <ellipse cx="80" cy="84" rx="2.4" ry="1.4"/>
+              <ellipse cx="106" cy="60" rx="1.8" ry="1.1"/>
+              <ellipse cx="52" cy="116" rx="2.1" ry="1.3"/>
+              <ellipse cx="126" cy="94" rx="1.6" ry="1"/>
+              <ellipse cx="92" cy="112" rx="1.3" ry="0.9"/>
+              <ellipse cx="40" cy="148" rx="1.7" ry="1"/>
+              <ellipse cx="140" cy="68" rx="1.2" ry="0.8"/>
+            </g>
+          </g>
+        </defs>
+
+        <ellipse class="cookie-shadow" cx="160" cy="210" rx="134" ry="13" fill="url(#g-shadow)"/>
+        <path class="tab" d="M153 134l13-2 17 27-12 6Z"/>
+
+        <g class="half half-l">
+          <use href="#half" fill="url(#g-left)"/>
+        </g>
+        <g class="half half-r">
+          <g transform="matrix(-1 0 0 1 320 0)">
+            <use href="#half" fill="url(#g-right)"/>
+          </g>
+        </g>
+
+        <path class="crease" d="M160 34 159 54 153 74 161 98 154 122 160 146"/>
+
+        <g class="crumbs">
+          <circle class="crumb c1" cx="160" cy="62" r="2.6"/>
+          <circle class="crumb c2" cx="160" cy="88" r="1.8"/>
+          <circle class="crumb c3" cx="160" cy="112" r="2.2"/>
+          <circle class="crumb c4" cx="160" cy="136" r="1.6"/>
+        </g>
+      </svg>
+    </div>
+
+    <div class="slip" id="slip">
+      <p class="fortune" id="fortune" aria-live="polite"></p>
+      <span class="seal" lang="zh-Hans" aria-hidden="true">福</span>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="btn" id="next" type="button" disabled>Get another cookie</button>
+    <p class="badge" id="badge" role="status" data-state="idle">
+      <span class="dot" aria-hidden="true"></span>
+      <span class="badge-new" id="badge-new" hidden>New leader</span>
+      <span class="badge-text" id="badge-text">Finding the leader…</span>
+    </p>
+  </div>
+</main>
+
+<footer class="footer">
+  <p>Served by the elected leader <span aria-hidden="true">·</span> Bully algorithm on Kubernetes<span class="demo-tag" id="demo-tag" hidden> <span aria-hidden="true">·</span> demo mode</span></p>
+</footer>
+
+<script src="/static/app.js"></script>
 </body>
 </html>

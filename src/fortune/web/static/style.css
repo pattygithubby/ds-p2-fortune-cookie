@@ -1,1 +1,902 @@
-/* Placeholder: styles for the fortune cookie page. */
+/* Fortune Cookie: a handmade card on a warm table.
+   Every color, radius, shadow, font and timing lives on :root and is
+   redefined for night mode below. */
+
+:root {
+  --font-serif: "Fraunces", "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  /* Table, card and ink */
+  --bg: #ede2cf;
+  --bg-glow: #f8f1e4;
+  --card: #fbf7ef;
+  --card-line: #e4d6be;
+  --ink: #2b2018;
+  --ink-soft: #66513f;
+  --gold: #b5813a;
+  --focus: #9a4f12;
+  --focus-on-bg: var(--focus);   /* focus ring for controls on the page background */
+  --on-bg: var(--ink-soft);      /* text that sits on the page background (footer) */
+
+  /* Button and theme toggle */
+  --btn-bg: #3a2a1f;
+  --btn-bg-hover: #4d3828;
+  --btn-ink: #fbf3e4;
+  --toggle-bg: #f8f1e5;
+  --toggle-line: #dccbb0;
+
+  /* Paper slip */
+  --slip: #fffdf8;
+  --slip-ink: #33261b;
+  --slip-edge: #e6d9c3;
+  --seal: #b03a2e;
+
+  /* Leader badge */
+  --badge-bg: #f3eadb;
+  --badge-line: #e0d0b6;
+  --badge-ink: #5b4736;
+  --new-ink: #8a5a14;
+  --new-ring: rgba(181, 129, 58, 0.28);
+  --new-glow: rgba(214, 160, 70, 0.45);
+  --idle: #a08d78;
+  --ok: #2f8a55;
+  --warn: #a8670f;
+  --bad: #c0392b;
+
+  /* Cookie */
+  --cookie-hi: #f8d898;
+  --cookie-mid: #e3a453;
+  --cookie-lo: #b8702c;
+  --cookie-deep: #a1601f;
+  --cookie-edge: #9a5a1e;
+  --cookie-fold: #fae2ad;
+  --cookie-cavity: #7a4114;
+  --cookie-ridge: #fff0cf;
+  --cookie-speck: #8d5220;
+  --crease: #8a4d1a;
+  --cookie-shadow: #5a3a1c;
+  --cookie-shadow-opacity: 0.32;
+
+  /* Texture */
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .4 0 0 0 0 .3 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --grain-opacity: 0.38;
+  --card-grain-opacity: 0.22;
+  --grain-blend: multiply;
+
+  /* Shape and depth */
+  --radius-card: 20px;
+  --radius-slip: 3px;
+  --radius-pill: 999px;
+  --shadow-card:
+    0 1px 1px rgba(80, 52, 24, 0.06),
+    0 6px 14px -4px rgba(80, 52, 24, 0.10),
+    0 28px 60px -18px rgba(80, 52, 24, 0.30);
+  --shadow-slip:
+    0 0 0 1px var(--slip-edge),
+    0 1px 2px rgba(80, 52, 24, 0.10),
+    0 10px 22px -10px rgba(80, 52, 24, 0.35);
+  --shadow-btn: 0 1px 0 rgba(255, 255, 255, 0.10) inset, 0 6px 14px -6px rgba(58, 42, 31, 0.55);
+  --shadow-toggle: 0 2px 8px -3px rgba(80, 52, 24, 0.25);
+
+  /* Type scale */
+  --fortune-size: clamp(1.02rem, 0.9rem + 0.65vw, 1.3rem);
+
+  /* Motion (app.js reads these, so the timing lives in one place) */
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.55, 0, 0.35, 1);
+  --ease-spring: cubic-bezier(0.3, 1.5, 0.55, 1);
+  --t-close: 200ms;
+  --t-open: 420ms;
+  --t-slip: 340ms;
+  --slip-delay: 120ms;
+}
+
+:root[data-theme="dark"] {
+  --bg: #140f0a;
+  --bg-glow: #2e2014;
+  --card: #1f1711;
+  --card-line: #3b2d20;
+  --ink: #f3e8d6;
+  --ink-soft: #c4b098;
+  --gold: #d6a85a;
+  --focus: #f0c879;
+
+  --btn-bg: #e2b566;
+  --btn-bg-hover: #edc57e;
+  --btn-ink: #22170e;
+  --toggle-bg: #211912;
+  --toggle-line: #3d2e21;
+
+  --slip: #f7eedc;
+  --slip-ink: #2e2218;
+  --slip-edge: #dcc9a7;
+  --seal: #a8382c;
+
+  --badge-bg: #2a2018;
+  --badge-line: #3f3024;
+  --badge-ink: #d6c4aa;
+  --new-ink: #eec476;
+  --new-ring: rgba(226, 181, 102, 0.30);
+  --new-glow: rgba(240, 190, 100, 0.40);
+  --idle: #8f7d68;
+  --ok: #5cc489;
+  --warn: #eba93e;
+  --bad: #f07161;
+
+  --cookie-hi: #f4cd80;
+  --cookie-mid: #d49444;
+  --cookie-lo: #9c5b22;
+  --cookie-deep: #84491a;
+  --cookie-edge: #6e3c12;
+  --cookie-fold: #f5d696;
+  --cookie-cavity: #4a2408;
+  --cookie-ridge: #fbe2a8;
+  --cookie-speck: #6d3a12;
+  --crease: #6a3810;
+  --cookie-shadow: #000000;
+  --cookie-shadow-opacity: 0.75;
+
+  --grain-opacity: 0.30;
+  --card-grain-opacity: 0.20;
+  --grain-blend: soft-light;
+
+  --shadow-card:
+    0 0 0 1px #2b2017,
+    0 18px 50px -12px rgba(0, 0, 0, 0.65),
+    0 0 120px -30px rgba(226, 160, 70, 0.18);
+  --shadow-slip:
+    0 0 0 1px var(--slip-edge),
+    0 10px 24px -10px rgba(0, 0, 0, 0.7),
+    0 0 42px 4px rgba(240, 186, 100, 0.20);
+  --shadow-btn: 0 1px 0 rgba(255, 245, 220, 0.35) inset, 0 0 24px -6px rgba(226, 181, 102, 0.45);
+  --shadow-toggle: 0 2px 10px -3px rgba(0, 0, 0, 0.6);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --t-close: 160ms;
+    --t-open: 260ms;
+    --t-slip: 260ms;
+    --slip-delay: 0ms;
+  }
+}
+
+/* ---------- Page ---------- */
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+
+body {
+  position: relative;
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 76px 16px 28px;
+  overflow-x: hidden;
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 40%, var(--bg-glow), transparent 72%),
+    var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-image: var(--grain);
+  opacity: var(--grain-opacity);
+  mix-blend-mode: var(--grain-blend);
+  pointer-events: none;
+}
+
+[hidden] { display: none !important; }
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+
+/* ---------- Toolbar: style and theme toggles ---------- */
+
+.toolbar {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 3;
+  display: flex;
+  gap: 10px;
+}
+
+.toolbar :focus-visible { outline-color: var(--focus-on-bg); }
+
+.tool-btn {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--toggle-line);
+  border-radius: 50%;
+  background: var(--toggle-bg);
+  color: var(--ink-soft);
+  box-shadow: var(--shadow-toggle);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tool-btn:hover { color: var(--ink); }
+
+.style-toggle[aria-pressed="true"] {
+  border-color: var(--gold);
+  color: var(--seal);
+}
+.style-toggle[aria-pressed="true"] .icon-lantern { fill: var(--seal); fill-opacity: 0.18; }
+
+.icon {
+  grid-area: 1 / 1;
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 320ms var(--ease-out), opacity 200ms linear;
+}
+
+:root:not([data-theme="dark"]) .icon-sun,
+:root[data-theme="dark"] .icon-moon {
+  opacity: 0;
+  transform: rotate(-50deg) scale(0.6);
+}
+
+/* ---------- Card ---------- */
+
+.card {
+  position: relative;
+  z-index: 1;
+  isolation: isolate;
+  width: 100%;
+  max-width: 540px;
+  padding: clamp(30px, 7vw, 52px) clamp(20px, 6vw, 52px) clamp(26px, 6vw, 44px);
+  border-radius: var(--radius-card);
+  background: var(--card);
+  box-shadow: var(--shadow-card);
+  text-align: center;
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  inset: 9px;
+  border: 1px solid var(--card-line);
+  border-radius: calc(var(--radius-card) - 7px);
+  pointer-events: none;
+}
+
+.card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background-image: var(--grain);
+  opacity: var(--card-grain-opacity);
+  mix-blend-mode: var(--grain-blend);
+  pointer-events: none;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  font: 500 0.72rem/1.3 var(--font-sans);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: clamp(2.1rem, 1.5rem + 3vw, 3rem);
+  font-weight: 560;
+  font-optical-sizing: auto;
+  line-height: 1.04;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+}
+
+.rule {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 132px;
+  margin: 16px auto 0;
+}
+
+.rule::before,
+.rule::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--gold);
+  opacity: 0.65;
+}
+
+.rule span {
+  width: 6px;
+  height: 6px;
+  border: 1px solid var(--gold);
+  transform: rotate(45deg);
+}
+
+/* ---------- Stage: cookie + slip ---------- */
+
+.stage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: clamp(14px, 4vw, 24px);
+}
+
+.cookie {
+  position: relative;
+  z-index: 2;
+  width: clamp(188px, 58vw, 284px);
+  aspect-ratio: 320 / 230;
+  transform-origin: 50% 85%;
+}
+
+.cookie svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.s-hi { stop-color: var(--cookie-hi); }
+.s-mid { stop-color: var(--cookie-mid); }
+.s-lo { stop-color: var(--cookie-lo); }
+.s-deep { stop-color: var(--cookie-deep); }
+.s-shadow { stop-color: var(--cookie-shadow); }
+
+.body { stroke: var(--cookie-edge); stroke-width: 1.2; stroke-opacity: 0.55; }
+.curl { fill: var(--cookie-cavity); opacity: 0.22; }
+.lip { fill: var(--cookie-fold); opacity: 0.9; }
+.ridge { fill: none; stroke: var(--cookie-ridge); stroke-width: 3.5; stroke-linecap: round; opacity: 0.55; }
+.specks { fill: var(--cookie-speck); opacity: 0.42; }
+
+.crease {
+  fill: none;
+  stroke: var(--crease);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0;
+}
+
+.tab {
+  fill: var(--slip);
+  stroke: var(--slip-edge);
+  stroke-width: 0.8;
+  opacity: 0;
+}
+
+/* The crack (and the slip's tip in it) exists only while the halves touch.
+   app.js sets .is-shut when they meet and clears it as they start to part; no fades. */
+.is-shut .crease { opacity: 0.6; }
+.is-shut .tab { opacity: 1; }
+
+.cookie-shadow {
+  opacity: var(--cookie-shadow-opacity);
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform var(--t-close) var(--ease-in-out);
+}
+
+.half {
+  transform-box: fill-box;
+  transition: transform var(--t-close) var(--ease-in-out);
+}
+
+.half-l { transform-origin: 95% 67%; }
+.half-r { transform-origin: 5% 67%; }
+
+.crumb { fill: var(--cookie-mid); opacity: 0; }
+.c1 { --dx: -30px; --dy: -26px; }
+.c2 { --dx: 34px; --dy: -14px; }
+.c3 { --dx: -22px; --dy: 30px; }
+.c4 { --dx: 26px; --dy: 34px; }
+
+/* The slip waits behind the cookie, then slides out of the crack. */
+.slip {
+  --lines: 3;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: min(100%, 420px);
+  min-height: calc(var(--lines) * 1.42em + 40px);
+  margin-top: -14px;
+  padding: 20px 30px;
+  border-radius: var(--radius-slip);
+  background: var(--slip);
+  color: var(--slip-ink);
+  box-shadow: var(--shadow-slip);
+  font-size: var(--fortune-size);
+  opacity: 0;
+  transform: translateY(-62%) scale(0.5, 0.3);
+  transition:
+    transform var(--t-close) var(--ease-in-out),
+    opacity var(--t-close) linear;
+}
+
+/* Two small vermilion marks, like a printed slip. */
+.slip::before,
+.slip::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 4px;
+  height: 4px;
+  margin-top: -2px;
+  border-radius: 50%;
+  background: var(--seal);
+  opacity: 0.75;
+}
+.slip::before { left: 12px; }
+.slip::after { right: 12px; }
+
+.fortune {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 1em;
+  font-weight: 400;
+  font-optical-sizing: auto;
+  line-height: 1.42;
+  text-wrap: balance;
+  overflow-wrap: break-word;
+}
+
+.fortune.is-muted { font-style: italic; opacity: 0.8; }
+
+/* Open */
+.is-open .half {
+  transition: transform var(--t-open) var(--ease-spring);
+}
+.is-open .half-l { transform: translate(-14px, -12px) rotate(-14deg); }
+.is-open .half-r { transform: translate(14px, -12px) rotate(14deg); }
+.is-open .cookie-shadow {
+  transform: scaleX(1.14);
+  transition: transform var(--t-open) var(--ease-out);
+}
+.is-open .crumb { animation: crumb 600ms var(--ease-out) both; }
+.is-open .c2 { animation-delay: 30ms; }
+.is-open .c4 { animation-delay: 50ms; }
+
+.is-open .slip {
+  opacity: 1;
+  transform: translateY(0) rotate(-1.2deg);
+  transition:
+    transform var(--t-slip) var(--ease-out) var(--slip-delay),
+    opacity calc(var(--t-slip) * 0.5) linear var(--slip-delay);
+}
+
+/* Unavailable: the cookie stays closed and a note sits beneath it. */
+.is-note .slip {
+  opacity: 1;
+  transform: translateY(0) rotate(-1.2deg);
+  transition: transform var(--t-slip) var(--ease-out), opacity var(--t-slip) linear;
+}
+
+/* Waiting or retrying: the closed cookie breathes. */
+.is-waiting .cookie { animation: breathe 1.7s var(--ease-in-out) infinite; }
+
+@keyframes breathe {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  30% { transform: rotate(-2.4deg) scale(1.018); }
+  65% { transform: rotate(1.8deg) scale(1.024); }
+}
+
+@keyframes crumb {
+  0% { opacity: 0; transform: translate(0, 0); }
+  15% { opacity: 1; }
+  100% { opacity: 0; transform: translate(var(--dx), var(--dy)); }
+}
+
+/* ---------- Controls ---------- */
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin-top: clamp(24px, 6vw, 32px);
+}
+
+.btn {
+  appearance: none;
+  min-height: 48px;
+  padding: 0 30px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--btn-bg);
+  color: var(--btn-ink);
+  box-shadow: var(--shadow-btn);
+  font: 600 1rem/1 var(--font-sans);
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: transform 160ms var(--ease-out), opacity 160ms linear;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn:hover { background: var(--btn-bg-hover); }
+.btn:active { transform: translateY(1px) scale(0.985); }
+.btn:disabled { opacity: 0.7; cursor: progress; }
+.btn:disabled:hover { background: var(--btn-bg); }
+
+.badge {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  min-height: 30px;
+  margin: 0;
+  padding: 5px 14px 5px 12px;
+  border: 1px solid var(--badge-line);
+  border-radius: var(--radius-pill);
+  background: var(--badge-bg);
+  color: var(--badge-ink);
+  font: 500 0.8125rem/1.3 var(--font-sans);
+  font-variant-numeric: tabular-nums;
+  text-align: left;
+}
+
+.badge-text { overflow-wrap: anywhere; }
+
+.badge-new {
+  flex: none;
+  padding-right: 8px;
+  border-right: 1px solid var(--badge-line);
+  color: var(--new-ink);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.dot {
+  --dot: var(--idle);
+  position: relative;
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--dot);
+}
+
+.dot::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  background: var(--dot);
+  opacity: 0;
+}
+
+.badge[data-state="ok"] .dot { --dot: var(--ok); }
+.badge[data-state="electing"] .dot { --dot: var(--warn); }
+.badge[data-state="down"] .dot { --dot: var(--bad); }
+.badge[data-state="electing"] .dot::after { animation: ping 1.2s var(--ease-out) infinite; }
+.badge[data-state="idle"] .dot { animation: fade 1.6s var(--ease-in-out) infinite; }
+
+.badge.is-new::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  box-shadow: 0 0 0 3px var(--new-ring), 0 0 24px 4px var(--new-glow);
+  opacity: 0;
+  pointer-events: none;
+  animation: glow 2.8s ease-out both;
+}
+
+@keyframes ping {
+  0% { transform: scale(0.4); opacity: 0.55; }
+  100% { transform: scale(1.7); opacity: 0; }
+}
+
+@keyframes fade {
+  50% { opacity: 0.35; }
+}
+
+@keyframes glow {
+  0% { opacity: 0; }
+  12% { opacity: 1; }
+  60% { opacity: 0.8; }
+  100% { opacity: 0; }
+}
+
+/* ---------- Footer ---------- */
+
+.footer {
+  position: relative;
+  z-index: 1;
+  margin-top: 22px;
+  max-width: 540px;
+  text-align: center;
+  font: 400 0.78rem/1.55 var(--font-sans);
+  letter-spacing: 0.02em;
+  color: var(--on-bg);
+}
+
+.footer p { margin: 0; }
+
+/* ---------- Chinese style (the lantern button) ----------
+   Lacquer red and gold with a meander lattice, hanging lanterns, the Chinese title
+   幸运饼干 ("fortune cookie") and a 福 ("good fortune") seal on the slip.
+   Works with both light and night mode. */
+
+:root[data-style="festive"]:not([data-theme="dark"]) {
+  --bg: #9b1b22;
+  --bg-glow: #c4362f;
+  --card: #fdf6e7;
+  --card-line: #c99a3c;
+  --ink: #2a1712;
+  --ink-soft: #7a3b2c;
+  --gold: #c99a3c;
+  --focus: #8f1a1f;
+  --focus-on-bg: #f5c542;
+  --on-bg: #f6dca0;
+
+  --btn-bg: #b8202a;
+  --btn-bg-hover: #cc2e33;
+  --btn-ink: #fff3d6;
+  --toggle-bg: #fdf3df;
+  --toggle-line: #d8b25e;
+
+  --slip: #fffaf0;
+  --slip-edge: #e3c9a0;
+  --seal: #c0262d;
+
+  --badge-bg: #fbf0dc;
+  --badge-line: #e3c48a;
+  --badge-ink: #6b3a24;
+  --new-ink: #a01c22;
+
+  --grain-opacity: 0.22;
+  --fret: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='44'%3E%3Cpath d='M6 6h32v32H14V14h16v16h-8v-8' fill='none' stroke='%23f2c35a' stroke-opacity='.16' stroke-width='2'/%3E%3C/svg%3E");
+
+  --shadow-card:
+    0 0 0 1px rgba(120, 20, 10, 0.25),
+    0 8px 18px -6px rgba(60, 0, 0, 0.35),
+    0 34px 70px -20px rgba(50, 0, 0, 0.55);
+  --shadow-btn:
+    inset 0 0 0 1.5px rgba(240, 200, 110, 0.85),
+    0 6px 14px -6px rgba(120, 10, 10, 0.6);
+  --shadow-toggle: 0 2px 10px -3px rgba(50, 0, 0, 0.5);
+
+  --lantern-hi: #ff6a4d;
+  --lantern-mid: #d42a26;
+  --lantern-lo: #8e0f14;
+  --lantern-gold: #e8b64c;
+  --lantern-glow: rgba(255, 120, 60, 0.35);
+}
+
+:root[data-style="festive"][data-theme="dark"] {
+  --bg: #170506;
+  --bg-glow: #4a0d10;
+  --card: #22100c;
+  --card-line: #8a6a2a;
+  --ink: #f7e7c8;
+  --ink-soft: #d9b98a;
+  --gold: #e0b354;
+  --focus: #f2c14e;
+  --focus-on-bg: #f2c14e;
+  --on-bg: #e9c98a;
+
+  --btn-bg: #c22a2f;
+  --btn-bg-hover: #d63a3b;
+  --btn-ink: #ffe9b8;
+  --toggle-bg: #2a1210;
+  --toggle-line: #6b4a1e;
+
+  --slip: #f8ecd4;
+  --slip-edge: #d9be8c;
+  --seal: #c22a2f;
+
+  --badge-bg: #2c1410;
+  --badge-line: #5a2e1c;
+  --badge-ink: #e8cfa6;
+  --new-ink: #f2c14e;
+
+  --fret: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='44'%3E%3Cpath d='M6 6h32v32H14V14h16v16h-8v-8' fill='none' stroke='%23e0b354' stroke-opacity='.09' stroke-width='2'/%3E%3C/svg%3E");
+
+  --shadow-card:
+    0 0 0 1px #4a1d12,
+    0 18px 50px -12px rgba(0, 0, 0, 0.7),
+    0 0 120px -30px rgba(230, 60, 40, 0.28);
+  --shadow-btn:
+    inset 0 0 0 1.5px rgba(242, 193, 78, 0.8),
+    0 0 26px -6px rgba(230, 60, 40, 0.6);
+
+  --lantern-hi: #ff8a5c;
+  --lantern-mid: #e0332b;
+  --lantern-lo: #7a0a10;
+  --lantern-gold: #f2c14e;
+  --lantern-glow: rgba(255, 110, 50, 0.6);
+}
+
+[data-style="festive"] body {
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 40%, var(--bg-glow), transparent 72%),
+    var(--fret) 0 0 / 44px 44px,
+    var(--bg);
+}
+
+/* Festive-only pieces are hidden in the classic style */
+.lanterns,
+.corners,
+.cn-title,
+.seal { display: none; }
+
+[data-style="festive"] .corners,
+[data-style="festive"] .cn-title { display: block; }
+[data-style="festive"] .seal { display: grid; }
+
+/* Brush-lettered Chinese title under the English one */
+.cn-title {
+  margin: 8px 0 0;
+  font-family: "Ma Shan Zheng", "KaiTi", "STKaiti", "Kaiti SC", serif;
+  font-size: clamp(1.5rem, 1.2rem + 1.4vw, 1.9rem);
+  line-height: 1;
+  letter-spacing: 0.22em;
+  padding-left: 0.22em;   /* balances the letter-spacing after the last character */
+  color: var(--seal);
+}
+
+[data-style="festive"] .rule span {
+  background: var(--seal);
+  border-color: var(--seal);
+}
+
+/* Gold fret corners on the card */
+.corners i {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  border-top: 2px solid var(--gold);
+  border-left: 2px solid var(--gold);
+  pointer-events: none;
+}
+.corners i::after {
+  content: "";
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  width: 9px;
+  height: 9px;
+  border-top: 2px solid var(--gold);
+  border-left: 2px solid var(--gold);
+}
+.corners i:nth-child(1) { top: 16px; left: 16px; }
+.corners i:nth-child(2) { top: 16px; right: 16px; transform: scaleX(-1); }
+.corners i:nth-child(3) { bottom: 16px; left: 16px; transform: scaleY(-1); }
+.corners i:nth-child(4) { bottom: 16px; right: 16px; transform: scale(-1, -1); }
+
+[data-style="festive"] .card::before { border-color: var(--card-line); border-width: 1.5px; }
+
+/* A red 福 seal stamped on the corner of the slip */
+.seal {
+  position: absolute;
+  right: -12px;
+  bottom: -14px;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 5px;
+  background: var(--seal);
+  color: #fff1dc;
+  box-shadow: inset 0 0 0 2px rgba(255, 236, 210, 0.55), 0 3px 8px -3px rgba(80, 0, 0, 0.5);
+  font-family: "Ma Shan Zheng", "KaiTi", "STKaiti", "Kaiti SC", serif;
+  font-size: 24px;
+  line-height: 1;
+  transform: rotate(-8deg);
+}
+
+/* Hanging lanterns beside the card */
+[data-style="festive"] .lanterns {
+  display: block;
+  position: absolute;
+  inset: 0 0 auto;
+  height: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.lantern {
+  position: absolute;
+  top: 0;
+  width: 70px;
+  height: auto;
+  overflow: visible;
+  transform-origin: 50% 0;
+  filter: drop-shadow(0 6px 14px var(--lantern-glow));
+  animation: sway 5.5s ease-in-out infinite;
+}
+.lantern-l { left: calc(50% - 350px); }
+.lantern-r { right: calc(50% - 350px); top: -18px; animation-delay: -2.7s; }
+
+.ls-hi { stop-color: var(--lantern-hi); }
+.ls-mid { stop-color: var(--lantern-mid); }
+.ls-lo { stop-color: var(--lantern-lo); }
+.l-cord { fill: none; stroke: var(--lantern-gold); stroke-width: 1.6; }
+.l-cap, .l-knot { fill: var(--lantern-gold); }
+.l-rib { fill: none; stroke: var(--lantern-lo); stroke-width: 1.2; opacity: 0.55; }
+.l-tassel { fill: var(--lantern-mid); }
+
+@keyframes sway {
+  0%, 100% { transform: rotate(-3deg); }
+  50% { transform: rotate(3deg); }
+}
+
+/* Too narrow for a lantern on each side of the card without touching the toolbar:
+   one small lantern top left instead */
+@media (max-width: 940px) {
+  .lantern { width: 38px; }
+  .lantern-l { left: 18px; }
+  .lantern-r { display: none; }   /* the left one holds the shared drawing, so it stays */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lantern { animation: none; }
+}
+
+/* ---------- Small screens ---------- */
+
+@media (max-width: 420px) {
+  .slip { --lines: 4; padding: 18px 22px; }
+  .eyebrow { letter-spacing: 0.16em; }
+}
+
+/* ---------- Reduced motion: cross-fades instead of movement ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .half,
+  .is-open .half,
+  .cookie-shadow,
+  .is-open .cookie-shadow { transition: none; }
+
+  .slip,
+  .is-open .slip,
+  .is-note .slip {
+    transform: none;
+    transition: opacity var(--t-slip) linear;
+  }
+
+  .is-open .cookie { animation: fade-in var(--t-open) linear; }
+  .is-open .crumb { animation: none; }
+  .is-waiting .cookie { animation: fade 1.8s var(--ease-in-out) infinite; }
+  .badge[data-state="electing"] .dot::after { animation: none; }
+  .badge[data-state="electing"] .dot { animation: fade 1.6s var(--ease-in-out) infinite; }
+  .icon { transition: opacity 200ms linear; }
+  .btn:active { transform: none; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

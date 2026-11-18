@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e">
     <diagram id="architecture" name="Architecture">
-        <mxGraphModel dx="1046" dy="1134" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1180" pageHeight="860" background="#ffffff" math="0" shadow="0">
+        <mxGraphModel dx="1301" dy="1366" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1180" pageHeight="860" background="#ffffff" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -16,7 +16,7 @@
                 <mxCell id="n5" parent="1" style="rounded=1;arcSize=6;fontFamily=Helvetica;fontSize=12;fontColor=#1a1a1a;html=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="&lt;b&gt;Service fortune-web&lt;/b&gt;&lt;br&gt;type: NodePort&lt;br&gt;port 80 → http (8080)&lt;br&gt;&lt;i&gt;routes only to Ready pods&lt;/i&gt;" vertex="1">
                     <mxGeometry height="130" width="200" x="190" y="330" as="geometry"/>
                 </mxCell>
-                <mxCell id="n6" parent="1" style="rounded=1;arcSize=6;fontFamily=Helvetica;fontSize=12;fontColor=#1a1a1a;html=1;whiteSpace=wrap;fillColor=#e1d5e7;strokeColor=#9673a6;" value="&lt;b&gt;Headless Service bully&lt;/b&gt;&lt;br&gt;clusterIP: None&lt;br&gt;UDP 9000&lt;br&gt;publishNotReadyAddresses: true&lt;br&gt;DNS: bully-0.bully … bully-2.bully" vertex="1">
+                <mxCell id="n6" parent="1" style="rounded=1;arcSize=6;fontFamily=Helvetica;fontSize=12;fontColor=#1a1a1a;html=1;whiteSpace=wrap;fillColor=#e1d5e7;strokeColor=#9673A6;" value="&lt;b&gt;Headless Service bully&lt;/b&gt;&lt;br&gt;clusterIP: None&lt;br&gt;UDP 9000&lt;br&gt;publishNotReadyAddresses: true&lt;br&gt;DNS: bully-0.bully … bully-2.bully" vertex="1">
                     <mxGeometry height="150" width="200" x="190" y="560" as="geometry"/>
                 </mxCell>
                 <mxCell id="n7" parent="1" style="rounded=1;arcSize=6;fontFamily=Helvetica;fontSize=12;fontColor=#1a1a1a;html=1;whiteSpace=wrap;align=left;spacingLeft=14;fillColor=#d5e8d4;strokeColor=#82b366;" value="&lt;b&gt;Pod bully-2&lt;/b&gt; · Bully node 3&lt;br&gt;&lt;font color=&quot;#2d7a2d&quot;&gt;&lt;b&gt;LEADER · Ready&lt;/b&gt;&lt;/font&gt;&lt;br&gt;:8080 website (aiohttp)&lt;br&gt;:9000/udp Bully election&lt;br&gt;readinessProbe GET /leader → 200" vertex="1">
@@ -52,11 +52,13 @@
                 <mxCell id="n17" edge="1" parent="1" source="n5" style="html=1;fontFamily=Helvetica;fontSize=11;labelBackgroundColor=#ffffff;rounded=0;edgeStyle=orthogonalEdgeStyle;endArrow=block;endFill=1;strokeColor=#2d7a2d;strokeWidth=2;fontColor=#2d7a2d;exitX=1;exitY=0.2;entryX=0;entryY=0.5;" target="n7" value="HTTP :8080">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="n18" edge="1" parent="1" source="n5" style="html=1;fontFamily=Helvetica;fontSize=11;labelBackgroundColor=#ffffff;rounded=0;edgeStyle=orthogonalEdgeStyle;endArrow=open;dashed=1;strokeColor=#b3b3b3;fontColor=#808080;exitX=1;exitY=0.6;entryX=0;entryY=0.4875;fontSize=10;" target="n10" value="not Ready: no traffic">
-                    <mxGeometry relative="1" as="geometry"/>
+                <mxCell id="n18" edge="1" parent="1" source="n5" style="html=1;fontFamily=Helvetica;fontSize=11;labelBackgroundColor=#ffffff;rounded=0;edgeStyle=orthogonalEdgeStyle;endArrow=open;dashed=1;strokeColor=#000000;fontColor=#808080;exitX=1;exitY=0.6;entryX=0;entryY=0.4875;fontSize=10;" target="n10" value="not Ready: no traffic">
+                    <mxGeometry relative="1" x="-0.0909" y="-12" as="geometry">
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
                 </mxCell>
-                <mxCell id="n19" edge="1" parent="1" source="n5" style="html=1;fontFamily=Helvetica;fontSize=11;labelBackgroundColor=#ffffff;rounded=0;edgeStyle=orthogonalEdgeStyle;endArrow=open;dashed=1;strokeColor=#b3b3b3;fontColor=#808080;exitX=1;exitY=0.85;entryX=0;entryY=0.5;fontSize=10;" target="n13" value="not Ready">
-                    <mxGeometry relative="1" as="geometry"/>
+                <mxCell id="n19" edge="1" parent="1" source="n5" style="html=1;fontFamily=Helvetica;fontSize=11;labelBackgroundColor=#ffffff;rounded=0;edgeStyle=orthogonalEdgeStyle;endArrow=open;dashed=1;strokeColor=#000000;fontColor=#808080;exitX=1;exitY=0.85;entryX=0;entryY=0.25;fontSize=10;entryDx=0;entryDy=0;" target="n13" value="not Ready">
+                    <mxGeometry relative="1" x="0.1561" as="geometry"/>
                 </mxCell>
                 <mxCell id="n20" edge="1" parent="1" source="n7" style="html=1;fontFamily=Helvetica;fontSize=11;labelBackgroundColor=#ffffff;rounded=0;startArrow=block;endArrow=block;startFill=1;endFill=1;dashed=1;strokeColor=#9673a6;strokeWidth=2;fontColor=#6b4f80;exitX=0.3;exitY=1;entryX=0.3;entryY=0;" target="n10" value="Bully messages · UDP 9000">
                     <mxGeometry relative="1" as="geometry"/>
@@ -91,9 +93,9 @@
                     </mxGeometry>
                 </mxCell>
                 <mxCell id="n27" parent="1" style="text;strokeColor=none;fillColor=none;fontFamily=Helvetica;fontSize=12;fontColor=#1a1a1a;html=1;whiteSpace=wrap;align=left;fontSize=11;" value="Bully election (UDP 9000, peers addressed as bully-N.bully:9000)" vertex="1">
-                    <mxGeometry height="24" width="380" x="480" y="788" as="geometry"/>
+                    <mxGeometry height="24" width="380" x="470" y="788" as="geometry"/>
                 </mxCell>
-                <mxCell id="n28" edge="1" parent="1" style="html=1;fontFamily=Helvetica;fontSize=11;labelBackgroundColor=#ffffff;rounded=0;endArrow=open;dashed=1;strokeColor=#b3b3b3;fontColor=#808080;" value="">
+                <mxCell id="n28" edge="1" parent="1" style="html=1;fontFamily=Helvetica;fontSize=11;labelBackgroundColor=#ffffff;rounded=0;endArrow=open;dashed=1;strokeColor=#000000;fontColor=#808080;" value="">
                     <mxGeometry relative="1" as="geometry">
                         <mxPoint x="900" y="800" as="sourcePoint"/>
                         <mxPoint x="950" y="800" as="targetPoint"/>

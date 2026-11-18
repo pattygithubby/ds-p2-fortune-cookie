@@ -28,7 +28,7 @@ The report must explain design decisions and implementation, and include two exp
 `src/` layout, two packages that only meet in one adapter:
 
 - [src/bully/](src/bully) — the Bully election library, copied unchanged from our P1 project (`ds-p1-bully-election`). Standard library only, Python 3.12+. Has the original Garcia-Molina algorithm ([original.py](src/bully/original.py)) and our improved variant with fewer messages ([improved.py](src/bully/improved.py)), chosen with `BULLY_ALGORITHM` (default and recommended: `improved`). Nodes talk over UDP port 9000. On Kubernetes the node id comes from the StatefulSet pod name (`bully-0` is node 1). [\_\_main\_\_.py](src/bully/__main__.py) has `Config.from_env`, `build()` and `serve()` and documents the `BULLY_*` variables. The algorithm is described in [docs/bully-ref.md](docs/bully-ref.md). Treat it as a library: don't put website code in it.
-- [src/fortune/](src/fortune) — the website. Currently stubs (`NotImplementedError`) with the planned design in each docstring.
+- [src/fortune/](src/fortune) — the website (aiohttp). Only the leader hosts it: on a follower `/` and `/api/fortune` answer 503 with the leader's id, and the page's JavaScript retries, so a failover shows up as a short wait.
   - [config.py](src/fortune/config.py) — web settings from the environment (`WEB_PORT`, `LOG_LEVEL`).
   - [election.py](src/fortune/election.py) — `LeaderElection`, the only module that imports `bully`: runs the node in a background thread and exposes `is_leader()` / `leader_id()`.
   - [fortunes.py](src/fortune/fortunes.py) — `FortuneSource`, reads [data/fortunes.txt](src/fortune/data/fortunes.txt).
@@ -49,6 +49,8 @@ make test      # python3 -m pytest (pytest finds src/ via pythonpath in pyprojec
 make build     # docker build -t fortune-cookie .
 make deploy    # kubectl apply -k deploy/k8s
 ```
+
+To run one pod locally (it elects itself leader): `BULLY_N=1 BULLY_ID=1 BULLY_PEERS=127.0.0.1:9000 BULLY_STATE_DIR=.state python -m fortune`, then open http://localhost:8080. On Windows the venv's interpreter is `.venv/Scripts/python.exe`.
 
 The StatefulSet uses a local image (`imagePullPolicy: IfNotPresent`); load it into the cluster first (e.g. `kind load docker-image fortune-cookie`). To use Docker Hub instead, change the image and pull policy (https://kubernetes.io/docs/concepts/containers/images/).
 
