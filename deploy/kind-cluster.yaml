@@ -1,0 +1,13 @@
+# A local kind cluster for this project: `make cluster` (kind create cluster --config ...).
+# kind runs Kubernetes inside a Docker container, so the NodePort of the fortune-web
+# Service (30080) is mapped to the host to make the site reachable at
+# http://localhost:30080.
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: fortune
+nodes:
+  - role: control-plane
+    extraPortMappings:
+      - containerPort: 30080
+        hostPort: 30080
+        protocol: TCP

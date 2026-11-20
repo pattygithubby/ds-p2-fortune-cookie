@@ -35,12 +35,19 @@ spec:
             - name: election
               containerPort: 9000
               protocol: UDP
-          # TODO: enable once /healthz and /leader exist (src/fortune/web/app.py).
-          # livenessProbe:
-          #   httpGet: {path: /healthz, port: http}
-          # readinessProbe:
-          #   httpGet: {path: /leader, port: http}
-          #   periodSeconds: 1
+          # Restart a pod whose web server stops answering.
+          livenessProbe:
+            httpGet: {path: /healthz, port: http}
+            periodSeconds: 5
+          # /leader is 200 only on the leader, so only the leader is Ready and the
+          # fortune-web Service sends all traffic to it. Followers stay unready (and
+          # stay reachable for the election through publishNotReadyAddresses).
+          # Note: a rolling update waits for each pod to become Ready, so it stalls at
+          # the first follower. Redeploy with `kubectl delete pod -l app=fortune-cookie`.
+          readinessProbe:
+            httpGet: {path: /leader, port: http}
+            periodSeconds: 1
+            failureThreshold: 1   # drop a pod that lost leadership after one failed probe
           volumeMounts:
             - name: state
               mountPath: /data

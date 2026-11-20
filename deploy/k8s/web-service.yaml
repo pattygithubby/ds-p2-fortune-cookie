@@ -12,4 +12,5 @@ spec:
     - name: http
       port: 80
       targetPort: http
+      nodePort: 30080   # fixed, so the browser and the experiment scripts have a stable URL
       protocol: TCP

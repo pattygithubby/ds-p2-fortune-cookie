@@ -30,14 +30,24 @@ The report must explain design decisions and implementation, and include two exp
 - [src/bully/](src/bully) — the Bully election library, copied unchanged from our P1 project (`ds-p1-bully-election`). Standard library only, Python 3.12+. Has the original Garcia-Molina algorithm ([original.py](src/bully/original.py)) and our improved variant with fewer messages ([improved.py](src/bully/improved.py)), chosen with `BULLY_ALGORITHM` (default and recommended: `improved`). Nodes talk over UDP port 9000. On Kubernetes the node id comes from the StatefulSet pod name (`bully-0` is node 1). [\_\_main\_\_.py](src/bully/__main__.py) has `Config.from_env`, `build()` and `serve()` and documents the `BULLY_*` variables. The algorithm is described in [docs/bully-ref.md](docs/bully-ref.md). Treat it as a library: don't put website code in it.
 - [src/fortune/](src/fortune) — the website (aiohttp). Only the leader hosts it: on a follower `/` and `/api/fortune` answer 503 with the leader's id, and the page's JavaScript retries, so a failover shows up as a short wait.
   - [config.py](src/fortune/config.py) — web settings from the environment (`WEB_PORT`, `LOG_LEVEL`).
-  - [election.py](src/fortune/election.py) — `LeaderElection`, the only module that imports `bully`: runs the node in a background thread and exposes `is_leader()` / `leader_id()`.
-  - [fortunes.py](src/fortune/fortunes.py) — `FortuneSource`, reads [data/fortunes.txt](src/fortune/data/fortunes.txt).
-  - [web/app.py](src/fortune/web/app.py) — `create_app(fortunes, election)`; routes `/`, `/api/fortune`, `/healthz`, `/leader`. Static page in [web/static/](src/fortune/web/static).
-  - [\_\_main\_\_.py](src/fortune/__main__.py) — `python -m fortune`, the container entry point.
+  - [election.py](src/fortune/election.py) — `LeaderElection`, the only module that imports `bully`: runs `bully.__main__.build()` / `serve()` in a daemon thread and exposes `is_leader()` (state `NORMAL` and coordinator is self) / `leader_id()`, both read under `node._lock`.
+  - [fortunes.py](src/fortune/fortunes.py) — `FortuneSource`, reads [data/fortunes.txt](src/fortune/data/fortunes.txt) once into memory.
+  - [web/app.py](src/fortune/web/app.py) — `create_app(fortunes, election)`. `/` and `/api/fortune` are leader-only; `/leader` is 200 only on the leader (readiness probe); `/healthz` is always 200 (liveness); `/static/*` is served by any pod. Responses are `Cache-Control: no-store`.
+  - [web/static/](src/fortune/web/static) — plain HTML/CSS/JS page. `app.js` retries through a failover (3 s request timeout, backoff 250 ms → 1 s, gives up after 15 s). Open with `?demo` for a fake API that simulates failovers without a server.
+  - [\_\_main\_\_.py](src/fortune/__main__.py) — `python -m fortune`, the container entry point. SIGTERM → aiohttp `on_cleanup` → `election.stop()`. Access log is off; log lines have millisecond timestamps, which experiment 2 measures from.
 - [tests/bully/](tests/bully) — P1's tests (keep them passing). [tests/fortune/](tests/fortune) — tests for the website.
-- [deploy/k8s/](deploy/k8s) — kustomize: StatefulSet `bully` (3 replicas; `BULLY_N` must equal `replicas`), headless Service `bully` (UDP 9000, `publishNotReadyAddresses: true`), and NodePort Service `fortune-web`. Plan: a readiness probe on `/leader` so `fortune-web` only routes to the leader (probe is commented out until the endpoint exists).
-- [loadtest/](loadtest), [experiments/](experiments) — the two report experiments (placeholders).
-- [docs/](docs) — assignment, Bully paper notes, `report/`.
+- [deploy/k8s/](deploy/k8s) — kustomize: StatefulSet `bully` (3 replicas, `podManagementPolicy: Parallel`, a 10Mi PVC per pod at `/data` for the Bully safe storage; `BULLY_N` must equal `replicas`), headless Service `bully` (UDP 9000, gives each pod the DNS name `bully-<ord>.bully`; `publishNotReadyAddresses: true` so followers, which are never Ready, stay reachable), and NodePort Service `fortune-web` (port 80 → 8080).
+  - NodePort fixed at **30080**. Probes: liveness `/healthz` (every 5 s), readiness `/leader` (every 1 s, `failureThreshold: 1`), so only the leader is Ready and `fortune-web` has a single endpoint. Followers showing `0/1` is intended, and `kubectl rollout status` never completes.
+  - A StatefulSet rolling update stalls at the first follower (it waits for each pod to become Ready). Redeploy by deleting the pods (`make redeploy`), not with `kubectl rollout restart`.
+- [deploy/kind-cluster.yaml](deploy/kind-cluster.yaml) — the local kind cluster `fortune`, mapping NodePort 30080 to `localhost:30080`.
+- [loadtest/](loadtest), [experiments/](experiments) — the two report experiments (placeholders; plans in [docs/checklist.md](docs/checklist.md) steps 3–4).
+- [docs/](docs) — assignment, Bully paper notes, [checklist.md](docs/checklist.md) (project status and next steps), `report/` (draw.io diagrams in `report/diagrams/`).
+
+## Failover behaviour
+
+Pod `bully-2` (node 3) leads when all pods are up. When the leader dies, the followers notice on their next `timeout()` (every `CHECK_INTERVAL` = 2 s, plus T = 1 s with no answer), elect `bully-1` (node 2), and it starts passing `/leader`. The StatefulSet then recreates `bully-2` with the same name and volume; its `recovery()` always starts an election, so node 3 takes leadership back.
+
+Measured on kind (20 November 2026): after `kubectl delete pod bully-2`, the pod is back about 2 s later, before the 1 s readiness probe marks `bully-1` Ready, so node 2 never serves and clients see about 2 s of failures. To show a takeover that lasts, keep the leader down with `kubectl scale statefulset bully --replicas=2` (about 3 s of failures, then `bully-1` serves); scale back to 3 afterwards.
 
 ## Build and run
 
@@ -49,6 +59,8 @@ make test      # python3 -m pytest (pytest finds src/ via pythonpath in pyprojec
 make build     # docker build -t fortune-cookie .
 make deploy    # kubectl apply -k deploy/k8s
 ```
+
+Cluster workflow (kind; full steps in [README.md](README.md)): `make build cluster load deploy`, then `make status`; site at http://localhost:30080. After code changes: `make build load redeploy`. Tear down: `make undeploy` (also deletes the state PVCs) and `make cluster-delete`.
 
 To run one pod locally (it elects itself leader): `BULLY_N=1 BULLY_ID=1 BULLY_PEERS=127.0.0.1:9000 BULLY_STATE_DIR=.state python -m fortune`, then open http://localhost:8080. On Windows the venv's interpreter is `.venv/Scripts/python.exe`.
 

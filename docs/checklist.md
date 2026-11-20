@@ -37,16 +37,16 @@ Commands assume the repository root and an activated `.venv`
 - [x] Ran one pod locally; every endpoint answers correctly
 - [x] Frontend designed: SVG cookie, leader badge, night mode, retry during failover
       (3 s request timeout, backoff 250 ms → 1 s, give up after 15 s), `?demo` mode
-- [ ] **Commit step 1.** Everything above is still uncommitted:
+- [x] **Commit step 1.** Everything above is still uncommitted:
       `git add -A && git commit -m "feat: fortune website with leader-only serving"`
-- [ ] `README.md`: replace the status line "the website is stubbed" and add the local run
+- [x] `README.md`: replace the status line "the website is stubbed" and add the local run
       command (`BULLY_N=1 BULLY_ID=1 BULLY_PEERS=127.0.0.1:9000 BULLY_STATE_DIR=.state python -m fortune`)
 
 ## 2. Run it on a cluster
 
 Goal: three pods, one leader, and only the leader receiving web traffic.
 
-- [ ] Pick the local cluster. How the image and the NodePort reach it differs per cluster:
+- [x] Pick the local cluster: **kind** (`deploy/kind-cluster.yaml`, `make cluster`; maps 30080 to the host). How the image and the NodePort reach it differs per cluster:
 
   | Cluster | Image into the cluster | Website URL |
   |---|---|---|
@@ -54,13 +54,13 @@ Goal: three pods, one leader, and only the leader receiving web traffic.
   | kind | `kind load docker-image fortune-cookie` | needs `extraPortMappings` for 30080 when the cluster is created |
   | minikube | `minikube image load fortune-cookie` | `minikube service fortune-web --url` |
 
-- [ ] Fix the NodePort so the scripts have a stable URL: in `deploy/k8s/web-service.yaml`
+- [x] Fix the NodePort so the scripts have a stable URL: in `deploy/k8s/web-service.yaml`
       add `nodePort: 30080` under the `http` port
-- [ ] Start Docker and build the image: `docker build -t fortune-cookie .`
-- [ ] Check the clean shutdown: `docker run -d --name fc -e BULLY_N=1 -e BULLY_ID=1 -e BULLY_PEERS=127.0.0.1:9000 fortune-cookie`,
+- [x] Start Docker and build the image: `docker build -t fortune-cookie .`
+- [x] Check the clean shutdown: `docker run -d --name fc -e BULLY_N=1 -e BULLY_ID=1 -e BULLY_PEERS=127.0.0.1:9000 fortune-cookie`,
       then `docker stop fc` should finish in about a second (not 10 s) and
       `docker logs fc` should end with `stopped; sent N messages`
-- [ ] Enable the probes in `deploy/k8s/statefulset.yaml` (replace the commented block):
+- [x] Enable the probes in `deploy/k8s/statefulset.yaml` (replace the commented block):
 
   ```yaml
   livenessProbe:
@@ -72,18 +72,26 @@ Goal: three pods, one leader, and only the leader receiving web traffic.
     failureThreshold: 1   # remove a pod that lost leadership after one failed probe
   ```
 
-- [ ] Deploy: `kubectl apply -k deploy/k8s`
-- [ ] Check that only `bully-2` (node 3) is Ready:
+- [x] Deploy: `kubectl apply -k deploy/k8s` (`make deploy`). `kubectl rollout status` never
+      finishes, because followers are never Ready; use `make status` instead
+- [x] Check that only `bully-2` (node 3) is Ready:
       `kubectl get pods -l app=fortune-cookie` shows `1/1` only for `bully-2`, and
       `kubectl get endpoints fortune-web` lists a single IP
-- [ ] Check the election in the logs: `kubectl logs bully-2` ends with
+- [x] Check the election in the logs: `kubectl logs bully-2` ends with
       `bully: NORMAL: coordinator of nodes [1, 2, 3]`
-- [ ] Open the site at the NodePort URL. Don't use `kubectl port-forward`: it attaches to one
+- [x] Open the site at the NodePort URL. Don't use `kubectl port-forward`: it attaches to one
       pod and never follows a failover
-- [ ] Manual failover: `kubectl delete pod bully-2`. Within a few seconds `bully-1` becomes
-      Ready, the page's badge goes amber and then shows node 2, and after `bully-2` restarts
-      node 3 takes over again
-- [ ] In `CLAUDE.md`, replace "probe is commented out until the endpoint exists" with the
+- [x] Manual failover, tried on kind on 20 November 2026:
+  - `kubectl delete pod bully-2`: `bully-1` won the election about 1.1 s after the delete,
+    but kind restarted `bully-2` about 2.1 s after the delete and node 3 took over again
+    before the readiness probe marked `bully-1` Ready. Clients saw about 2.1 s of failures,
+    then node 3. **For experiment 2 this means the delete case measures "detect + restart",
+    not a takeover by node 2.**
+  - `kubectl scale statefulset bully --replicas=2` (leader stays down): about 3.2 s of
+    failures, then `bully-1` (node 2) was the only Ready pod and served everything.
+    Scaling back to 3 handed leadership back to node 3.
+  - Consider measuring both cases in experiment 2.
+- [x] In `CLAUDE.md`, replace "probe is commented out until the endpoint exists" with the
       probe settings above
 
 ## 3. Experiment 1: load test
