@@ -76,6 +76,18 @@ def test_only_the_leader_hosts_the_website(fortunes, path, election, leader_id):
     assert body["leader"] == leader_id
 
 
+@pytest.mark.parametrize("path", ["/", "/api/fortune"])
+def test_a_follower_closes_the_connection(fortunes, path):
+    # So a keep-alive client reconnects and the Service can route it to the new leader
+    _, headers, _ = get(create_app(fortunes, FOLLOWER), path)
+    assert headers["Connection"] == "close"
+
+
+def test_the_leader_keeps_the_connection_open(fortunes):
+    _, headers, _ = get(create_app(fortunes, LEADER), "/api/fortune")
+    assert headers.get("Connection", "keep-alive").lower() == "keep-alive"
+
+
 @pytest.mark.parametrize("election", [LEADER, FOLLOWER, ELECTING])
 def test_healthz_is_always_ok(fortunes, election):
     status, _, body = get(create_app(fortunes, election), "/healthz")

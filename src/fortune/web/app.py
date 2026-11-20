@@ -34,7 +34,13 @@ def create_app(fortunes: FortuneSource, election: LeaderElection) -> web.Applica
 
     def not_leader() -> web.Response:
         body = {"error": "not the leader", "leader": election.leader_id(), "pod": pod}
-        return web.json_response(body, status=503, headers=NO_STORE)
+        response = web.json_response(body, status=503, headers=NO_STORE)
+        # Close the connection. A Service only picks a pod when a connection is opened, so
+        # a browser that keeps its connection alive to a pod that lost leadership (e.g. the
+        # old leader after a takeover) would get 503 forever. After a close, its retry opens
+        # a new connection, which the Service routes to the current leader.
+        response.force_close()
+        return response
 
     async def index(request: web.Request) -> web.StreamResponse:
         if not election.is_leader():

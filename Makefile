@@ -12,8 +12,13 @@ test:           ## run all tests
 build:          ## build the container image
 	docker build -t $(IMAGE) .
 
-cluster:        ## create the local kind cluster (site at http://localhost:30080)
-	kind create cluster --config deploy/kind-cluster.yaml
+cluster:        ## create the local kind cluster if it doesn't exist (site at http://localhost:30080)
+	@if kind get clusters 2>/dev/null | grep -qx '$(CLUSTER)'; then \
+		echo "kind cluster '$(CLUSTER)' already exists, using it"; \
+		kubectl config use-context kind-$(CLUSTER); \
+	else \
+		kind create cluster --config deploy/kind-cluster.yaml; \
+	fi
 
 load:           ## copy the image into the kind cluster (not needed on Docker Desktop Kubernetes)
 	kind load docker-image $(IMAGE) --name $(CLUSTER)

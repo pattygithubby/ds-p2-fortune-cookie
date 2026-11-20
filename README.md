@@ -78,7 +78,7 @@ type those directly on Windows if you don't have `make`.
 
 ```sh
 make build     # docker build -t fortune-cookie .
-make cluster   # kind create cluster --config deploy/kind-cluster.yaml   (once)
+make cluster   # kind create cluster --config deploy/kind-cluster.yaml   (skipped if it exists)
 make load      # kind load docker-image fortune-cookie --name fortune
 make deploy    # kubectl apply -k deploy/k8s
 make status    # pods and the web Service's endpoint
