@@ -5,9 +5,8 @@ algorithm (from our P1 project), and only the leader serves the website. If the 
 fails, the others elect a new one. The assignment is in [docs/assignment.md](docs/assignment.md).
 
 > Status: the website and the election run on Kubernetes, tested on Docker Desktop and kind
-> (3 pods, only the leader serves, failover works). The two experiments and the report are
-> still to do. See
-> [docs/checklist.md](docs/checklist.md).
+> (3 pods, only the leader serves, failover works). Both experiments are done (results and
+> findings in [docs/experiments.md](docs/experiments.md)); the report is still to do. See [docs/checklist.md](docs/checklist.md).
 
 ## Layout
 
@@ -18,8 +17,9 @@ fails, the others elect a new one. The assignment is in [docs/assignment.md](doc
 | [tests/](tests) | `tests/bully` (P1's tests) and `tests/fortune` |
 | [deploy/k8s/](deploy/k8s) | StatefulSet, headless Service for the election, web Service for users |
 | [deploy/kind-cluster.yaml](deploy/kind-cluster.yaml) | Local kind cluster that exposes the site on `localhost:30080` |
-| [loadtest/](loadtest), [experiments/](experiments) | The two experiments for the report (not written yet) |
-| [docs/](docs) | Assignment, Bully paper notes, checklist, report diagrams (`docs/report/diagrams/`) |
+| [loadtest/](loadtest) | Experiment 1: load test script, method and results |
+| [experiments/](experiments) | Experiment 2: leader failure script, method and results; `results/` holds the data and plots of both |
+| [docs/](docs) | Assignment, Bully paper notes, checklist, experiment results ([experiments.md](docs/experiments.md)), report diagrams (`docs/report/diagrams/`) |
 
 ## How it works
 
@@ -187,6 +187,22 @@ the `apps.kubernetes.io/pod-index` label, which needs Kubernetes 1.28 or newer. 
 use `minikube image load fortune-cookie` instead of `make load`, and
 `minikube service fortune-web --url` for the address.
 
+## Run the experiments
+
+With the app deployed on a cluster and the `.venv` active (`make install` also installs
+matplotlib for the plots):
+
+```sh
+make loadtest   # experiment 1: about a minute
+make failover   # experiment 2: 15 leader failures, about 12 minutes; leaves bully-3 as leader
+make report     # tables and plots again from the saved results, no cluster needed
+```
+
+Both write to `experiments/results/` and overwrite earlier results; use e.g.
+`make failover RESULTS=experiments/results/mine` to keep them apart. How to run them:
+[loadtest/README.md](loadtest/README.md) and [experiments/README.md](experiments/README.md);
+results and findings: [docs/experiments.md](docs/experiments.md).
+
 ## Commands
 
 ```sh
@@ -200,4 +216,7 @@ make status           # pods and the leader endpoint
 make redeploy         # restart all pods (after make build, and make load on kind)
 make undeploy         # remove the deployment and its volumes
 make cluster-delete   # delete the kind cluster (kind only)
+make loadtest         # experiment 1
+make failover         # experiment 2 (RUNS=5 per mode)
+make report           # experiment tables and plots from the saved results
 ```

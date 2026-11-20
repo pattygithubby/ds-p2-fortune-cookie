@@ -1,0 +1,215 @@
+run1 bully-1 2026-11-20T10:32:15.633019091Z 10:32:15.631 bully.transport_udp: -> AreYouThere to node 3: no answer
+run1 bully-1 2026-11-20T10:32:15.673580924Z 10:32:15.673 bully.transport_udp: <- Halt from node 2
+run1 bully-1 2026-11-20T10:32:15.676306008Z 10:32:15.676 bully: ELECTION: halted by node 2, waiting for it
+run1 bully-1 2026-11-20T10:32:15.679218883Z 10:32:15.679 bully.transport_udp: <- Ready from node 2
+run1 bully-1 2026-11-20T10:32:15.680122591Z 10:32:15.680 bully: NORMAL: node 2 is coordinator
+run1 bully-1 2026-11-20T10:32:17.235591884Z 10:32:17.235 bully.transport_udp: <- Halt from node 3
+run1 bully-1 2026-11-20T10:32:17.236767759Z 10:32:17.236 bully: ELECTION: halted by node 3, waiting for it
+run1 bully-1 2026-11-20T10:32:17.238357717Z 10:32:17.238 bully.transport_udp: <- Ready from node 3
+run1 bully-1 2026-11-20T10:32:17.239471217Z 10:32:17.239 bully: NORMAL: node 3 is coordinator
+run1 bully-2 2026-11-20T10:32:15.656226883Z 10:32:15.655 bully.transport_udp: -> AreYouThere to node 3: no answer
+run1 bully-2 2026-11-20T10:32:15.664018966Z 10:32:15.663 bully.transport_udp: -> AreYouThere to node 3: no answer
+run1 bully-2 2026-11-20T10:32:15.672544091Z 10:32:15.672 bully: ELECTION: running its own election
+run1 bully-2 2026-11-20T10:32:15.676501966Z 10:32:15.676 bully.transport_udp: -> Halt to node 1: ok
+run1 bully-2 2026-11-20T10:32:15.678756508Z 10:32:15.678 bully: REORGANIZATION: coordinator, announcing to nodes [1]
+run1 bully-2 2026-11-20T10:32:15.680242674Z 10:32:15.680 bully.transport_udp: -> Ready to node 1: ok
+run1 bully-2 2026-11-20T10:32:15.681031341Z 10:32:15.680 bully: NORMAL: coordinator of nodes [1, 2]
+run1 bully-2 2026-11-20T10:32:17.231390217Z 10:32:17.230 bully.transport_udp: <- Halt from node 3
+run1 bully-2 2026-11-20T10:32:17.233059509Z 10:32:17.232 bully: ELECTION: halted by node 3, waiting for it
+run1 bully-2 2026-11-20T10:32:17.240336300Z 10:32:17.240 bully.transport_udp: <- Ready from node 3
+run1 bully-2 2026-11-20T10:32:17.241078342Z 10:32:17.241 bully: NORMAL: node 3 is coordinator
+run1 bully-3 2026-11-20T10:32:17.219884633Z 10:32:17.219 fortune.election: improved Bully, node 3 of 3, T = 1.0 s
+run1 bully-3 2026-11-20T10:32:17.221674467Z 10:32:17.221 bully: DOWN: starting
+run1 bully-3 2026-11-20T10:32:17.222420258Z 10:32:17.222 bully: listening on port 9000
+run1 bully-3 2026-11-20T10:32:17.222689842Z 10:32:17.222 fortune: website on port 8080
+run1 bully-3 2026-11-20T10:32:17.226623675Z 10:32:17.226 bully: ELECTION: running its own election
+run1 bully-3 2026-11-20T10:32:17.233413967Z 10:32:17.233 bully.transport_udp: -> Halt to node 2: ok
+run1 bully-3 2026-11-20T10:32:17.236877467Z 10:32:17.236 bully.transport_udp: -> Halt to node 1: ok
+run1 bully-3 2026-11-20T10:32:17.238077509Z 10:32:17.238 bully: REORGANIZATION: coordinator, announcing to nodes [1, 2]
+run1 bully-3 2026-11-20T10:32:17.239532509Z 10:32:17.239 bully.transport_udp: -> Ready to node 1: ok
+run1 bully-3 2026-11-20T10:32:17.241137634Z 10:32:17.241 bully.transport_udp: -> Ready to node 2: ok
+run1 bully-3 2026-11-20T10:32:17.241751717Z 10:32:17.241 bully: NORMAL: coordinator of nodes [1, 2, 3]
+run1 bully-3-before 2026-11-20T10:29:53.472193553Z 10:29:53.471 fortune.election: improved Bully, node 3 of 3, T = 1.0 s
+run1 bully-3-before 2026-11-20T10:29:53.473462095Z 10:29:53.473 bully: DOWN: starting
+run1 bully-3-before 2026-11-20T10:29:53.474073220Z 10:29:53.473 bully: listening on port 9000
+run1 bully-3-before 2026-11-20T10:29:53.474307678Z 10:29:53.474 fortune: website on port 8080
+run1 bully-3-before 2026-11-20T10:29:53.476735928Z 10:29:53.476 bully: ELECTION: running its own election
+run1 bully-3-before 2026-11-20T10:29:53.479762845Z 10:29:53.479 bully.transport_udp: -> Halt to node 2: ok
+run1 bully-3-before 2026-11-20T10:29:53.482211637Z 10:29:53.482 bully.transport_udp: -> Halt to node 1: ok
+run1 bully-3-before 2026-11-20T10:29:53.483544012Z 10:29:53.483 bully: REORGANIZATION: coordinator, announcing to nodes [1, 2]
+run1 bully-3-before 2026-11-20T10:29:53.484539053Z 10:29:53.484 bully.transport_udp: -> Ready to node 1: ok
+run1 bully-3-before 2026-11-20T10:29:53.485554762Z 10:29:53.485 bully.transport_udp: -> Ready to node 2: ok
+run1 bully-3-before 2026-11-20T10:29:53.486170012Z 10:29:53.486 bully: NORMAL: coordinator of nodes [1, 2, 3]
+run1 bully-3-before 2026-11-20T10:32:14.619720424Z 10:32:14.617 bully: stopped; sent 144 messages (AreYouNormal 140, Halt 2, Ready 2), 0 unanswered
+run2 bully-1 2026-11-20T10:32:56.703338221Z 10:32:56.702 bully.transport_udp: -> AreYouThere to node 3: no answer
+run2 bully-1 2026-11-20T10:32:56.754660888Z 10:32:56.754 bully.transport_udp: <- Halt from node 2
+run2 bully-1 2026-11-20T10:32:56.757072721Z 10:32:56.756 bully: ELECTION: halted by node 2, waiting for it
+run2 bully-1 2026-11-20T10:32:56.760324680Z 10:32:56.760 bully.transport_udp: <- Ready from node 2
+run2 bully-1 2026-11-20T10:32:56.761489263Z 10:32:56.761 bully: NORMAL: node 2 is coordinator
+run2 bully-1 2026-11-20T10:32:58.114689514Z 10:32:58.114 bully.transport_udp: <- Halt from node 3
+run2 bully-1 2026-11-20T10:32:58.116091847Z 10:32:58.115 bully: ELECTION: halted by node 3, waiting for it
+run2 bully-1 2026-11-20T10:32:58.117938180Z 10:32:58.117 bully.transport_udp: <- Ready from node 3
+run2 bully-1 2026-11-20T10:32:58.118605972Z 10:32:58.118 bully: NORMAL: node 3 is coordinator
+run2 bully-2 2026-11-20T10:32:56.732856846Z 10:32:56.731 bully.transport_udp: -> AreYouThere to node 3: no answer
+run2 bully-2 2026-11-20T10:32:56.750590555Z 10:32:56.750 bully.transport_udp: -> AreYouThere to node 3: no answer
+run2 bully-2 2026-11-20T10:32:56.754212721Z 10:32:56.753 bully: ELECTION: running its own election
+run2 bully-2 2026-11-20T10:32:56.757223471Z 10:32:56.757 bully.transport_udp: -> Halt to node 1: ok
+run2 bully-2 2026-11-20T10:32:56.759690346Z 10:32:56.759 bully: REORGANIZATION: coordinator, announcing to nodes [1]
+run2 bully-2 2026-11-20T10:32:56.761610805Z 10:32:56.761 bully.transport_udp: -> Ready to node 1: ok
+run2 bully-2 2026-11-20T10:32:56.762789888Z 10:32:56.762 bully: NORMAL: coordinator of nodes [1, 2]
+run2 bully-2 2026-11-20T10:32:58.110059430Z 10:32:58.109 bully.transport_udp: <- Halt from node 3
+run2 bully-2 2026-11-20T10:32:58.111271972Z 10:32:58.111 bully: ELECTION: halted by node 3, waiting for it
+run2 bully-2 2026-11-20T10:32:58.118987472Z 10:32:58.118 bully.transport_udp: <- Ready from node 3
+run2 bully-2 2026-11-20T10:32:58.119672764Z 10:32:58.119 bully: NORMAL: node 3 is coordinator
+run2 bully-3 2026-11-20T10:32:58.101675347Z 10:32:58.101 fortune.election: improved Bully, node 3 of 3, T = 1.0 s
+run2 bully-3 2026-11-20T10:32:58.102967889Z 10:32:58.102 bully: DOWN: starting
+run2 bully-3 2026-11-20T10:32:58.103784222Z 10:32:58.103 bully: listening on port 9000
+run2 bully-3 2026-11-20T10:32:58.103956514Z 10:32:58.103 fortune: website on port 8080
+run2 bully-3 2026-11-20T10:32:58.107929014Z 10:32:58.107 bully: ELECTION: running its own election
+run2 bully-3 2026-11-20T10:32:58.111379930Z 10:32:58.111 bully.transport_udp: -> Halt to node 2: ok
+run2 bully-3 2026-11-20T10:32:58.116251097Z 10:32:58.116 bully.transport_udp: -> Halt to node 1: ok
+run2 bully-3 2026-11-20T10:32:58.117555222Z 10:32:58.117 bully: REORGANIZATION: coordinator, announcing to nodes [1, 2]
+run2 bully-3 2026-11-20T10:32:58.118681347Z 10:32:58.118 bully.transport_udp: -> Ready to node 1: ok
+run2 bully-3 2026-11-20T10:32:58.119747680Z 10:32:58.119 bully.transport_udp: -> Ready to node 2: ok
+run2 bully-3 2026-11-20T10:32:58.120459264Z 10:32:58.120 bully: NORMAL: coordinator of nodes [1, 2, 3]
+run2 bully-3-before 2026-11-20T10:32:17.219884633Z 10:32:17.219 fortune.election: improved Bully, node 3 of 3, T = 1.0 s
+run2 bully-3-before 2026-11-20T10:32:17.221674467Z 10:32:17.221 bully: DOWN: starting
+run2 bully-3-before 2026-11-20T10:32:17.222420258Z 10:32:17.222 bully: listening on port 9000
+run2 bully-3-before 2026-11-20T10:32:17.222689842Z 10:32:17.222 fortune: website on port 8080
+run2 bully-3-before 2026-11-20T10:32:17.226623675Z 10:32:17.226 bully: ELECTION: running its own election
+run2 bully-3-before 2026-11-20T10:32:17.233413967Z 10:32:17.233 bully.transport_udp: -> Halt to node 2: ok
+run2 bully-3-before 2026-11-20T10:32:17.236877467Z 10:32:17.236 bully.transport_udp: -> Halt to node 1: ok
+run2 bully-3-before 2026-11-20T10:32:17.238077509Z 10:32:17.238 bully: REORGANIZATION: coordinator, announcing to nodes [1, 2]
+run2 bully-3-before 2026-11-20T10:32:17.239532509Z 10:32:17.239 bully.transport_udp: -> Ready to node 1: ok
+run2 bully-3-before 2026-11-20T10:32:17.241137634Z 10:32:17.241 bully.transport_udp: -> Ready to node 2: ok
+run2 bully-3-before 2026-11-20T10:32:17.241751717Z 10:32:17.241 bully: NORMAL: coordinator of nodes [1, 2, 3]
+run2 bully-3-before 2026-11-20T10:32:55.546927596Z 10:32:55.545 bully: stopped; sent 42 messages (AreYouNormal 38, Halt 2, Ready 2), 0 unanswered
+run3 bully-1 2026-11-20T10:33:36.765670670Z 10:33:36.763 bully.transport_udp: -> AreYouThere to node 3: no answer
+run3 bully-1 2026-11-20T10:33:36.825461087Z 10:33:36.825 bully.transport_udp: <- Halt from node 2
+run3 bully-1 2026-11-20T10:33:36.827414504Z 10:33:36.827 bully: ELECTION: halted by node 2, waiting for it
+run3 bully-1 2026-11-20T10:33:36.829529337Z 10:33:36.829 bully.transport_udp: <- Ready from node 2
+run3 bully-1 2026-11-20T10:33:36.830379670Z 10:33:36.830 bully: NORMAL: node 2 is coordinator
+run3 bully-1 2026-11-20T10:33:38.618551879Z 10:33:38.618 bully.transport_udp: <- Halt from node 3
+run3 bully-1 2026-11-20T10:33:38.619277588Z 10:33:38.619 bully: ELECTION: halted by node 3, waiting for it
+run3 bully-1 2026-11-20T10:33:38.620788004Z 10:33:38.620 bully.transport_udp: <- Ready from node 3
+run3 bully-1 2026-11-20T10:33:38.621572296Z 10:33:38.621 bully: NORMAL: node 3 is coordinator
+run3 bully-2 2026-11-20T10:33:36.818101712Z 10:33:36.816 bully.transport_udp: -> AreYouThere to node 3: no answer
+run3 bully-2 2026-11-20T10:33:36.821234837Z 10:33:36.821 bully.transport_udp: -> AreYouThere to node 3: no answer
+run3 bully-2 2026-11-20T10:33:36.824915962Z 10:33:36.824 bully: ELECTION: running its own election
+run3 bully-2 2026-11-20T10:33:36.827527670Z 10:33:36.827 bully.transport_udp: -> Halt to node 1: ok
+run3 bully-2 2026-11-20T10:33:36.829189004Z 10:33:36.829 bully: REORGANIZATION: coordinator, announcing to nodes [1]
+run3 bully-2 2026-11-20T10:33:36.830510670Z 10:33:36.830 bully.transport_udp: -> Ready to node 1: ok
+run3 bully-2 2026-11-20T10:33:36.831138462Z 10:33:36.831 bully: NORMAL: coordinator of nodes [1, 2]
+run3 bully-2 2026-11-20T10:33:38.615821796Z 10:33:38.615 bully.transport_udp: <- Halt from node 3
+run3 bully-2 2026-11-20T10:33:38.616696338Z 10:33:38.616 bully: ELECTION: halted by node 3, waiting for it
+run3 bully-2 2026-11-20T10:33:38.621977713Z 10:33:38.621 bully.transport_udp: <- Ready from node 3
+run3 bully-2 2026-11-20T10:33:38.622677838Z 10:33:38.622 bully: NORMAL: node 3 is coordinator
+run3 bully-3 2026-11-20T10:33:38.608223963Z 10:33:38.608 fortune.election: improved Bully, node 3 of 3, T = 1.0 s
+run3 bully-3 2026-11-20T10:33:38.610345588Z 10:33:38.610 bully: DOWN: starting
+run3 bully-3 2026-11-20T10:33:38.611064004Z 10:33:38.610 bully: listening on port 9000
+run3 bully-3 2026-11-20T10:33:38.611325254Z 10:33:38.611 fortune: website on port 8080
+run3 bully-3 2026-11-20T10:33:38.615027004Z 10:33:38.614 bully: ELECTION: running its own election
+run3 bully-3 2026-11-20T10:33:38.616797129Z 10:33:38.616 bully.transport_udp: -> Halt to node 2: ok
+run3 bully-3 2026-11-20T10:33:38.619349921Z 10:33:38.619 bully.transport_udp: -> Halt to node 1: ok
+run3 bully-3 2026-11-20T10:33:38.620544629Z 10:33:38.620 bully: REORGANIZATION: coordinator, announcing to nodes [1, 2]
+run3 bully-3 2026-11-20T10:33:38.621642754Z 10:33:38.621 bully.transport_udp: -> Ready to node 1: ok
+run3 bully-3 2026-11-20T10:33:38.622750879Z 10:33:38.622 bully.transport_udp: -> Ready to node 2: ok
+run3 bully-3 2026-11-20T10:33:38.623402004Z 10:33:38.623 bully: NORMAL: coordinator of nodes [1, 2, 3]
+run3 bully-3-before 2026-11-20T10:32:58.101675347Z 10:32:58.101 fortune.election: improved Bully, node 3 of 3, T = 1.0 s
+run3 bully-3-before 2026-11-20T10:32:58.102967889Z 10:32:58.102 bully: DOWN: starting
+run3 bully-3-before 2026-11-20T10:32:58.103784222Z 10:32:58.103 bully: listening on port 9000
+run3 bully-3-before 2026-11-20T10:32:58.103956514Z 10:32:58.103 fortune: website on port 8080
+run3 bully-3-before 2026-11-20T10:32:58.107929014Z 10:32:58.107 bully: ELECTION: running its own election
+run3 bully-3-before 2026-11-20T10:32:58.111379930Z 10:32:58.111 bully.transport_udp: -> Halt to node 2: ok
+run3 bully-3-before 2026-11-20T10:32:58.116251097Z 10:32:58.116 bully.transport_udp: -> Halt to node 1: ok
+run3 bully-3-before 2026-11-20T10:32:58.117555222Z 10:32:58.117 bully: REORGANIZATION: coordinator, announcing to nodes [1, 2]
+run3 bully-3-before 2026-11-20T10:32:58.118681347Z 10:32:58.118 bully.transport_udp: -> Ready to node 1: ok
+run3 bully-3-before 2026-11-20T10:32:58.119747680Z 10:32:58.119 bully.transport_udp: -> Ready to node 2: ok
+run3 bully-3-before 2026-11-20T10:32:58.120459264Z 10:32:58.120 bully: NORMAL: coordinator of nodes [1, 2, 3]
+run3 bully-3-before 2026-11-20T10:33:36.419310962Z 10:33:36.418 bully: stopped; sent 42 messages (AreYouNormal 38, Halt 2, Ready 2), 0 unanswered
+run4 bully-1 2026-11-20T10:34:18.815899218Z 10:34:18.815 bully.transport_udp: -> AreYouThere to node 3: no answer
+run4 bully-1 2026-11-20T10:34:18.884189676Z 10:34:18.884 bully.transport_udp: <- Halt from node 2
+run4 bully-1 2026-11-20T10:34:18.886032509Z 10:34:18.885 bully: ELECTION: halted by node 2, waiting for it
+run4 bully-1 2026-11-20T10:34:18.888263884Z 10:34:18.888 bully.transport_udp: <- Ready from node 2
+run4 bully-1 2026-11-20T10:34:18.889034093Z 10:34:18.888 bully: NORMAL: node 2 is coordinator
+run4 bully-1 2026-11-20T10:34:19.980246843Z 10:34:19.979 bully.transport_udp: <- Halt from node 3
+run4 bully-1 2026-11-20T10:34:19.981350551Z 10:34:19.981 bully: ELECTION: halted by node 3, waiting for it
+run4 bully-1 2026-11-20T10:34:19.983215093Z 10:34:19.983 bully.transport_udp: <- Ready from node 3
+run4 bully-1 2026-11-20T10:34:19.984053260Z 10:34:19.983 bully: NORMAL: node 3 is coordinator
+run4 bully-2 2026-11-20T10:34:18.875892134Z 10:34:18.875 bully.transport_udp: -> AreYouThere to node 3: no answer
+run4 bully-2 2026-11-20T10:34:18.879591426Z 10:34:18.879 bully.transport_udp: -> AreYouThere to node 3: no answer
+run4 bully-2 2026-11-20T10:34:18.883492509Z 10:34:18.883 bully: ELECTION: running its own election
+run4 bully-2 2026-11-20T10:34:18.886168343Z 10:34:18.886 bully.transport_udp: -> Halt to node 1: ok
+run4 bully-2 2026-11-20T10:34:18.887912259Z 10:34:18.887 bully: REORGANIZATION: coordinator, announcing to nodes [1]
+run4 bully-2 2026-11-20T10:34:18.889139551Z 10:34:18.889 bully.transport_udp: -> Ready to node 1: ok
+run4 bully-2 2026-11-20T10:34:18.889932176Z 10:34:18.889 bully: NORMAL: coordinator of nodes [1, 2]
+run4 bully-2 2026-11-20T10:34:19.977332718Z 10:34:19.977 bully.transport_udp: <- Halt from node 3
+run4 bully-2 2026-11-20T10:34:19.978262635Z 10:34:19.978 bully: ELECTION: halted by node 3, waiting for it
+run4 bully-2 2026-11-20T10:34:19.984482676Z 10:34:19.984 bully.transport_udp: <- Ready from node 3
+run4 bully-2 2026-11-20T10:34:19.985343093Z 10:34:19.985 bully: NORMAL: node 3 is coordinator
+run4 bully-3 2026-11-20T10:34:19.970035260Z 10:34:19.969 fortune.election: improved Bully, node 3 of 3, T = 1.0 s
+run4 bully-3 2026-11-20T10:34:19.971683051Z 10:34:19.971 bully: DOWN: starting
+run4 bully-3 2026-11-20T10:34:19.972444260Z 10:34:19.972 fortune: website on port 8080
+run4 bully-3 2026-11-20T10:34:19.972582551Z 10:34:19.972 bully: listening on port 9000
+run4 bully-3 2026-11-20T10:34:19.975902301Z 10:34:19.975 bully: ELECTION: running its own election
+run4 bully-3 2026-11-20T10:34:19.978394635Z 10:34:19.978 bully.transport_udp: -> Halt to node 2: ok
+run4 bully-3 2026-11-20T10:34:19.981446176Z 10:34:19.981 bully.transport_udp: -> Halt to node 1: ok
+run4 bully-3 2026-11-20T10:34:19.982683426Z 10:34:19.982 bully: REORGANIZATION: coordinator, announcing to nodes [1, 2]
+run4 bully-3 2026-11-20T10:34:19.984134843Z 10:34:19.984 bully.transport_udp: -> Ready to node 1: ok
+run4 bully-3 2026-11-20T10:34:19.985425468Z 10:34:19.985 bully.transport_udp: -> Ready to node 2: ok
+run4 bully-3 2026-11-20T10:34:19.986100801Z 10:34:19.986 bully: NORMAL: coordinator of nodes [1, 2, 3]
+run4 bully-3-before 2026-11-20T10:33:38.608223963Z 10:33:38.608 fortune.election: improved Bully, node 3 of 3, T = 1.0 s
+run4 bully-3-before 2026-11-20T10:33:38.610345588Z 10:33:38.610 bully: DOWN: starting
+run4 bully-3-before 2026-11-20T10:33:38.611064004Z 10:33:38.610 bully: listening on port 9000
+run4 bully-3-before 2026-11-20T10:33:38.611325254Z 10:33:38.611 fortune: website on port 8080
+run4 bully-3-before 2026-11-20T10:33:38.615027004Z 10:33:38.614 bully: ELECTION: running its own election
+run4 bully-3-before 2026-11-20T10:33:38.616797129Z 10:33:38.616 bully.transport_udp: -> Halt to node 2: ok
+run4 bully-3-before 2026-11-20T10:33:38.619349921Z 10:33:38.619 bully.transport_udp: -> Halt to node 1: ok
+run4 bully-3-before 2026-11-20T10:33:38.620544629Z 10:33:38.620 bully: REORGANIZATION: coordinator, announcing to nodes [1, 2]
+run4 bully-3-before 2026-11-20T10:33:38.621642754Z 10:33:38.621 bully.transport_udp: -> Ready to node 1: ok
+run4 bully-3-before 2026-11-20T10:33:38.622750879Z 10:33:38.622 bully.transport_udp: -> Ready to node 2: ok
+run4 bully-3-before 2026-11-20T10:33:38.623402004Z 10:33:38.623 bully: NORMAL: coordinator of nodes [1, 2, 3]
+run4 bully-3-before 2026-11-20T10:34:17.275582800Z 10:34:17.274 bully: stopped; sent 42 messages (AreYouNormal 38, Halt 2, Ready 2), 0 unanswered
+run5 bully-1 2026-11-20T10:34:59.901909167Z 10:34:59.900 bully.transport_udp: -> AreYouThere to node 3: no answer
+run5 bully-1 2026-11-20T10:35:00.039132459Z 10:35:00.038 bully.transport_udp: <- Halt from node 2
+run5 bully-1 2026-11-20T10:35:00.050426167Z 10:35:00.049 bully: ELECTION: halted by node 2, waiting for it
+run5 bully-1 2026-11-20T10:35:00.065951625Z 10:35:00.065 bully.transport_udp: <- Ready from node 2
+run5 bully-1 2026-11-20T10:35:00.068190167Z 10:35:00.067 bully: NORMAL: node 2 is coordinator
+run5 bully-1 2026-11-20T10:35:01.233076918Z 10:35:01.232 bully.transport_udp: <- Halt from node 3
+run5 bully-1 2026-11-20T10:35:01.236007959Z 10:35:01.235 bully: ELECTION: halted by node 3, waiting for it
+run5 bully-1 2026-11-20T10:35:01.239215459Z 10:35:01.239 bully.transport_udp: <- Ready from node 3
+run5 bully-1 2026-11-20T10:35:01.240193168Z 10:35:01.240 bully: NORMAL: node 3 is coordinator
+run5 bully-2 2026-11-20T10:35:00.004177167Z 10:35:00.001 bully.transport_udp: -> AreYouThere to node 3: no answer
+run5 bully-2 2026-11-20T10:35:00.031764167Z 10:35:00.028 bully.transport_udp: -> AreYouThere to node 3: no answer
+run5 bully-2 2026-11-20T10:35:00.037471542Z 10:35:00.037 bully: ELECTION: running its own election
+run5 bully-2 2026-11-20T10:35:00.051098875Z 10:35:00.050 bully.transport_udp: -> Halt to node 1: ok
+run5 bully-2 2026-11-20T10:35:00.064479209Z 10:35:00.064 bully: REORGANIZATION: coordinator, announcing to nodes [1]
+run5 bully-2 2026-11-20T10:35:00.068524542Z 10:35:00.068 bully.transport_udp: -> Ready to node 1: ok
+run5 bully-2 2026-11-20T10:35:00.071349834Z 10:35:00.071 bully: NORMAL: coordinator of nodes [1, 2]
+run5 bully-2 2026-11-20T10:35:01.226672001Z 10:35:01.224 bully.transport_udp: <- Halt from node 3
+run5 bully-2 2026-11-20T10:35:01.229065376Z 10:35:01.228 bully: ELECTION: halted by node 3, waiting for it
+run5 bully-2 2026-11-20T10:35:01.240976834Z 10:35:01.240 bully.transport_udp: <- Ready from node 3
+run5 bully-2 2026-11-20T10:35:01.242218168Z 10:35:01.242 bully: NORMAL: node 3 is coordinator
+run5 bully-3 2026-11-20T10:35:01.209336834Z 10:35:01.209 fortune.election: improved Bully, node 3 of 3, T = 1.0 s
+run5 bully-3 2026-11-20T10:35:01.210755709Z 10:35:01.210 bully: DOWN: starting
+run5 bully-3 2026-11-20T10:35:01.211552584Z 10:35:01.211 fortune: website on port 8080
+run5 bully-3 2026-11-20T10:35:01.211679793Z 10:35:01.211 bully: listening on port 9000
+run5 bully-3 2026-11-20T10:35:01.217845584Z 10:35:01.217 bully: ELECTION: running its own election
+run5 bully-3 2026-11-20T10:35:01.229616584Z 10:35:01.229 bully.transport_udp: -> Halt to node 2: ok
+run5 bully-3 2026-11-20T10:35:01.236655876Z 10:35:01.236 bully.transport_udp: -> Halt to node 1: ok
+run5 bully-3 2026-11-20T10:35:01.238632293Z 10:35:01.238 bully: REORGANIZATION: coordinator, announcing to nodes [1, 2]
+run5 bully-3 2026-11-20T10:35:01.240467834Z 10:35:01.240 bully.transport_udp: -> Ready to node 1: ok
+run5 bully-3 2026-11-20T10:35:01.242516751Z 10:35:01.242 bully.transport_udp: -> Ready to node 2: ok
+run5 bully-3 2026-11-20T10:35:01.244107668Z 10:35:01.243 bully: NORMAL: coordinator of nodes [1, 2, 3]
+run5 bully-3-before 2026-11-20T10:34:19.970035260Z 10:34:19.969 fortune.election: improved Bully, node 3 of 3, T = 1.0 s
+run5 bully-3-before 2026-11-20T10:34:19.971683051Z 10:34:19.971 bully: DOWN: starting
+run5 bully-3-before 2026-11-20T10:34:19.972444260Z 10:34:19.972 fortune: website on port 8080
+run5 bully-3-before 2026-11-20T10:34:19.972582551Z 10:34:19.972 bully: listening on port 9000
+run5 bully-3-before 2026-11-20T10:34:19.975902301Z 10:34:19.975 bully: ELECTION: running its own election
+run5 bully-3-before 2026-11-20T10:34:19.978394635Z 10:34:19.978 bully.transport_udp: -> Halt to node 2: ok
+run5 bully-3-before 2026-11-20T10:34:19.981446176Z 10:34:19.981 bully.transport_udp: -> Halt to node 1: ok
+run5 bully-3-before 2026-11-20T10:34:19.982683426Z 10:34:19.982 bully: REORGANIZATION: coordinator, announcing to nodes [1, 2]
+run5 bully-3-before 2026-11-20T10:34:19.984134843Z 10:34:19.984 bully.transport_udp: -> Ready to node 1: ok
+run5 bully-3-before 2026-11-20T10:34:19.985425468Z 10:34:19.985 bully.transport_udp: -> Ready to node 2: ok
+run5 bully-3-before 2026-11-20T10:34:19.986100801Z 10:34:19.986 bully: NORMAL: coordinator of nodes [1, 2, 3]
+run5 bully-3-before 2026-11-20T10:34:58.236111264Z 10:34:58.226 bully: stopped; sent 42 messages (AreYouNormal 38, Halt 2, Ready 2), 0 unanswered

@@ -1,6 +1,6 @@
 # Project checklist
 
-Status as of 18 November 2026. Ticked items are done; everything else is still open.
+Status as of 20 November 2026. Ticked items are done; everything else is still open.
 The steps follow the order we planned: app, cluster, the two experiments, report.
 Commands assume the repository root and an activated `.venv`
 (on Windows: `.venv\Scripts\python.exe` instead of `python`).
@@ -97,48 +97,49 @@ Goal: three pods, one leader, and only the leader receiving web traffic.
 ## 3. Experiment 1: load test
 
 Goal: response times of `GET /api/fortune` under load. All requests go to the single leader pod.
+Done on Docker Desktop on 20 November 2026; method, results and findings in
+[experiments.md](experiments.md).
 
-- [ ] Write `loadtest/loadtest.py` (Python + aiohttp, already a dependency):
-  - arguments: `--url http://localhost:30080/api/fortune --requests 2000 --concurrency 10 --out <csv>`
-  - one CSV row per request: `start_s, latency_ms, status, leader, pod`
-  - a short warm-up (e.g. 50 requests) that is not recorded
-- [ ] Run it at concurrency 1, 10 and 50 and save `experiments/results/load-c{1,10,50}.csv`
-- [ ] Per run, compute: requests per second, p50, p95, p99, max latency, and error rate
-      (share of non-200 responses). `statistics.quantiles(latencies, n=100)` gives the
-      percentiles
-- [ ] Plot the latency CDF of the three runs in one figure (add `matplotlib` to the `dev`
-      extras in `pyproject.toml`) and save it as `experiments/results/load-cdf.png`
-- [ ] Note the setup in the report: cluster type, CPU/RAM, replicas = 3, `BULLY_ALGORITHM`
+- [x] `loadtest/loadtest.py` (Python + aiohttp): `run --url … --requests … --concurrency …
+      --out <csv>` writes `start_s, latency_ms, status, leader, pod` per request after 50
+      unrecorded warm-up requests; `report` prints the table and plots the CDF
+- [x] Ran 10 000 requests at concurrency 1, 10 and 50 (`make loadtest`):
+      `experiments/results/load.csv`. 2 000 requests finished in 0.2 s at
+      concurrency 50, too short to measure, hence 10 000
+- [x] Requests per second, p50/p95/p99/max and error rate per run: about 1 500 / 6 500 /
+      8 000 req/s, p50 0.6 / 1.3 / 5.6 ms, no errors, every request served by `bully-3`
+- [x] Latency CDF of the three runs: `experiments/results/load-cdf.png` (`matplotlib` added
+      to the `dev` extras)
+- [x] Setup noted in the README: Docker Desktop Kubernetes v1.36.1, one node, Docker VM with
+      8 CPUs and 4 GB on an Apple M1 with 8 GB, replicas = 3, `BULLY_ALGORITHM=improved`
 
 ## 4. Experiment 2: leader failure
 
-Goal: how long the election takes, and how long users wait.
+Goal: how long the election takes, and how long users wait. Done on Docker Desktop on
+20 November 2026; method, results and findings in [experiments.md](experiments.md).
 
-- [ ] Write `experiments/failover.py`:
-  - poll `/api/fortune` every 100 ms with a 1 s timeout; log `t, status, leader, pod` to CSV
-    (a timeout or connection error is logged as status `0`)
-  - after 5 s, take the leader's pod name from the last response and run
-    `kubectl delete pod <pod>` with `subprocess`; log the time of the delete
-  - keep polling for about 60 s, so the second takeover is recorded too
-  - finally save `kubectl logs --timestamps <pod>` of every pod, so the server log times
-    can be lined up with the client times
-- [ ] Measure from the pod logs (on the node that wins, e.g. `bully-2`):
-  - detection: delete → `-> AreYouThere to node 3: no answer`
-  - election: detection → `NORMAL: coordinator of nodes [1, 2]`
-  - expected limits: detection ≤ check interval (2 s) + T (1 s); election ≈ T + 2 round trips
-- [ ] Measure from the client CSV:
-  - user-visible gap: last 200 from node 3 → first 200 from node 2
-  - number of failed requests (status 0 or 503)
-- [ ] Repeat 5 times (`failover-run{1..5}.csv`); report the mean and min/max of each time
-- [ ] Describe the second takeover after `bully-3` restarts: its timing, and whether any
-      503s appear while `bully-2` is still in the Service's endpoints
-- [ ] Plot one run: time on the x axis, one dot per request, colored by status/leader, with
-      the delete marked; save as `experiments/results/failover-run1.png`
+- [x] `experiments/failover.py run`: polls `/api/fortune` every 100 ms (1 s timeout) and logs
+      `t, latency_ms, status, error, leader, pod`; after 5 s takes the leader out with
+      `--mode delete | force | scale`; polls 30 s after the action (the second takeover
+      happens within about 5 s, so 60 s wasn't needed); saves `kubectl logs --timestamps` of
+      every pod, following the old leader's log from before the action
+- [x] Measured from the pod logs: detection (action → `-> … to node 3: no answer`) and election
+      (→ `NORMAL: coordinator of nodes [1, 2]`); `failover.py report` does this
+- [x] Measured from the client CSV: the user-visible gap and the failed requests (503 vs. no
+      answer), plus routing (election → first 200 from node 2)
+- [x] 5 runs per mode (`failover-{delete,force,scale}.csv/.json/-pods.log`), mean and min/max reported.
+      Delete: detection 1.24 s, election 0.08 s, routing 1.03 s, gap 2.36 s (2.10–2.70)
+- [x] The second takeover after `bully-3` restarts: a second gap of 1.0–1.9 s, with 503s from
+      `bully-2` while it is still in the Service's endpoints
+- [x] Plots: `experiments/results/failover-{delete,force,scale}.png` (run 1 of each mode)
 - [ ] Write the measured times into `failover-timeline.drawio` next to the expected limits
-- [ ] Optional: repeat with `BULLY_ALGORITHM=original` (set in `statefulset.yaml`, redeploy)
-      and compare election times
-- [ ] Optional: compare a graceful delete with a crash
-      (`kubectl delete pod bully-3 --grace-period=0 --force`)
+- [ ] Optional: repeat with `BULLY_ALGORITHM=original` (set in `statefulset.yaml`, redeploy,
+      `make failover RESULTS=experiments/results/original`) and compare election times
+      (`make report` reads only `experiments/results/`; for the other folder run
+      `make report RESULTS=experiments/results/original`)
+- [x] Optional: graceful delete compared with a crash (`--mode force`). The force-deleted pod
+      is back after about 1 s instead of 2.7 s, so node 3 usually retakes leadership before
+      node 2 is ever routed to: a single gap of about 2.2 s
 
 ## 5. Report
 
@@ -155,8 +156,9 @@ Goal: how long the election takes, and how long users wait.
         only, followers answering 503
   - [ ] Implementation: reuse of the P1 library unchanged, the thread adapter
         (`election.py`), UDP for the election next to HTTP for the website, the page's retry
-  - [ ] Experiment 1: method, results table, CDF plot, discussion
-  - [ ] Experiment 2: method, results table, timeline plot, discussion
+  - [ ] Experiment 1: method, results table, CDF plot, discussion (draft material in
+        [experiments.md](experiments.md))
+  - [ ] Experiment 2: method, results table, timeline plot, discussion (same file)
   - [ ] Limitations
   - [ ] Conclusion
 - [ ] Limitations to mention:
@@ -171,5 +173,5 @@ Goal: how long the election takes, and how long users wait.
 ## Open questions
 
 - [ ] When is the deadline?
-- [ ] Which local cluster are we using?
+- [x] Which local cluster are we using? Docker Desktop for the experiments (kind also works)
 - [ ] Does the report have a required format or page limit?

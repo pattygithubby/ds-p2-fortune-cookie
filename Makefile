@@ -1,7 +1,7 @@
 IMAGE ?= fortune-cookie
 CLUSTER ?= fortune
 
-.PHONY: install test build cluster load deploy redeploy status undeploy cluster-delete clean
+.PHONY: install test build cluster load deploy redeploy status undeploy cluster-delete loadtest failover report clean
 
 install:        ## install the package and dev tools into the current environment
 	pip install -e '.[dev]'
@@ -39,6 +39,25 @@ undeploy:       ## remove everything deploy created, including the Bully state v
 
 cluster-delete: ## delete the kind cluster
 	kind delete cluster --name $(CLUSTER)
+
+RESULTS ?= experiments/results
+RUNS ?= 5
+
+loadtest:       ## experiment 1: 10000 requests at concurrency 1, 10 and 50, then the plot
+	python3 loadtest/loadtest.py run --concurrency 1 10 50 --out $(RESULTS)/load.csv
+	python3 loadtest/loadtest.py report $(RESULTS)/load.csv --plot $(RESULTS)/load-cdf.png
+
+failover:       ## experiment 2: RUNS leader failures per mode (delete, force, scale), then the report
+	for m in delete force scale; do \
+		python3 experiments/failover.py run --mode $$m --runs $(RUNS) --after 30 --out $(RESULTS)/failover-$$m || exit 1; \
+	done
+	$(MAKE) report
+
+report:         ## print the tables and redraw the plots from the saved results
+	python3 loadtest/loadtest.py report $(RESULTS)/load.csv --plot $(RESULTS)/load-cdf.png
+	for m in delete force scale; do \
+		python3 experiments/failover.py report $(RESULTS)/failover-$$m.json --plot $(RESULTS)/failover-$$m.png || exit 1; \
+	done
 
 clean:
 	rm -rf build dist src/*.egg-info .pytest_cache

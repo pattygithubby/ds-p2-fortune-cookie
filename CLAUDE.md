@@ -40,14 +40,17 @@ The report must explain design decisions and implementation, and include two exp
   - NodePort fixed at **30080**. Probes: liveness `/healthz` (every 5 s), readiness `/leader` (every 1 s, `failureThreshold: 1`), so only the leader is Ready and `fortune-web` has a single endpoint. Followers showing `0/1` is intended, and `kubectl rollout status` never completes.
   - A StatefulSet rolling update stalls at the first follower (it waits for each pod to become Ready). Redeploy by deleting the pods (`make redeploy`), not with `kubectl rollout restart`.
 - [deploy/kind-cluster.yaml](deploy/kind-cluster.yaml) — the local kind cluster `fortune`, mapping NodePort 30080 to `localhost:30080`.
-- [loadtest/](loadtest), [experiments/](experiments) — the two report experiments (placeholders; plans in [docs/checklist.md](docs/checklist.md) steps 3–4).
-- [docs/](docs) — assignment, Bully paper notes, [checklist.md](docs/checklist.md) (project status and next steps), `report/` (draw.io diagrams in `report/diagrams/`).
+- [loadtest/loadtest.py](loadtest/loadtest.py) — experiment 1 (`run`: closed-loop load at a given concurrency → CSV; `report`: req/s, percentiles, CDF plot). How to run in [loadtest/README.md](loadtest/README.md).
+- [experiments/failover.py](experiments/failover.py) — experiment 2 (`run --mode delete|force|scale`: polls `/api/fortune` every 100 ms, takes the leader out, saves the CSV, a JSON with action times and every pod's `kubectl logs --timestamps`; `report`: detection/election/routing/gap per run and the plot). How to run in [experiments/README.md](experiments/README.md). Data in `experiments/results/`: `load.csv`, and per mode `failover-<mode>.csv` / `.json` / `-pods.log` holding all runs (`*.log` there is un-ignored in `.gitignore`), plus the PNG plots.
+- [docs/experiments.md](docs/experiments.md) — results and findings of both experiments, written as material for the report. Update it when experiments are rerun.
+- Both scripts are standalone (`python loadtest/loadtest.py …`); their analysis functions are tested in [tests/experiments/](tests/experiments) (pytest's `pythonpath` includes `loadtest` and `experiments`). Make targets: `loadtest`, `failover` (`RUNS`, `RESULTS`), `report`.
+- [docs/](docs) — assignment, Bully paper notes, [experiments.md](docs/experiments.md), [checklist.md](docs/checklist.md) (project status and next steps), `report/` (draw.io diagrams in `report/diagrams/`).
 
 ## Failover behaviour
 
 Pod `bully-3` (node 3) leads when all pods are up. When the leader dies, the followers notice on their next `timeout()` (every `CHECK_INTERVAL` = 2 s, plus T = 1 s with no answer), elect `bully-2` (node 2), and it starts passing `/leader`. The StatefulSet then recreates `bully-3` with the same name and volume; its `recovery()` always starts an election, so node 3 takes leadership back.
 
-Measured on kind (20 November 2026): after `kubectl delete pod bully-3`, the pod is back about 2 s later, before the 1 s readiness probe marks `bully-2` Ready, so node 2 never serves and clients see about 2 s of failures. To show a takeover that lasts, keep the leader down with `kubectl scale statefulset bully --replicas=2` (about 3 s of failures, then `bully-2` serves); scale back to 3 afterwards.
+Measured on Docker Desktop (experiment 2, 20 November 2026, 5 runs per mode): users see about 2.0–2.7 s of failures, mostly detection (≤ 2 s check interval) and routing (≈ 1 s readiness probe + endpoint update); the election itself takes 20–290 ms. A graceful `kubectl delete pod bully-3` brings the pod back after about 2.7 s, after node 2 has started serving, so there is a second 1–2 s outage when node 3 retakes. A force delete brings it back after about 1 s, usually before node 2 is routed to. `kubectl scale statefulset bully --replicas=2` keeps node 2 serving. During an outage connections are refused (no Ready endpoint), not answered with 503; 503s come only from a pod that just lost leadership. On kind, a graceful delete restarted the pod after about 2 s, before node 2 served.
 
 ## Build and run
 
