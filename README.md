@@ -4,8 +4,9 @@ A fortune cookie website hosted on Kubernetes. The pods elect a leader with the 
 algorithm (from our P1 project), and only the leader serves the website. If the leader
 fails, the others elect a new one. The assignment is in [docs/assignment.md](docs/assignment.md).
 
-> Status: the website and the election run on a local kind cluster (3 pods, only the leader
-> serves, failover works). The two experiments and the report are still to do. See
+> Status: the website and the election run on Kubernetes, tested on Docker Desktop and kind
+> (3 pods, only the leader serves, failover works). The two experiments and the report are
+> still to do. See
 > [docs/checklist.md](docs/checklist.md).
 
 ## Layout
@@ -71,16 +72,45 @@ The `BULLY_*` variables are documented in [src/bully/\_\_main\_\_.py](src/bully/
 
 ## Run it on Kubernetes
 
-Needs Docker (Docker Desktop is fine), `kubectl`, and [kind](https://kind.sigs.k8s.io/)
-(`brew install kind`, or see the kind docs for Windows/Linux). kind runs a Kubernetes cluster
-inside a Docker container. The `make` targets are shown with the commands they run, so you can
-type those directly on Windows if you don't have `make`.
+Needs Docker, `kubectl`, and a local Kubernetes cluster (1.28 or newer). Pick one of the two
+below; everything after "Check that it works" is the same for both. The `make` targets are
+shown with the commands they run, so you can type those directly if you don't have `make`
+(e.g. on Windows).
+
+### Option A: Docker Desktop
+
+Once: in Docker Desktop open **Settings → Kubernetes**, tick **Enable Kubernetes** (choose
+**kubeadm** if it asks for a cluster type), click **Apply & restart**, and wait until
+Kubernetes shows green in the bottom-left corner.
+
+```sh
+kubectl config use-context docker-desktop   # make kubectl talk to Docker Desktop
+make build     # docker build -t fortune-cookie .
+make deploy    # kubectl apply -k deploy/k8s
+```
+
+Docker Desktop's Kubernetes uses your locally built image directly, so skip `make cluster`
+and `make load` (those are for kind). Quitting Docker Desktop stops the cluster; the pods come
+back when you start it again.
+
+### Option B: kind
+
+[kind](https://kind.sigs.k8s.io/) runs a Kubernetes cluster inside a Docker container
+(`brew install kind`, or see the kind docs for Windows/Linux).
 
 ```sh
 make build     # docker build -t fortune-cookie .
 make cluster   # kind create cluster --config deploy/kind-cluster.yaml   (skipped if it exists)
 make load      # kind load docker-image fortune-cookie --name fortune
 make deploy    # kubectl apply -k deploy/k8s
+```
+
+`make cluster` also switches kubectl to the kind cluster (`kind-fortune`). Docker Desktop's
+Kubernetes and kind both use `localhost:30080`, so run only one of them at a time.
+
+### Check that it works
+
+```sh
 make status    # pods and the web Service's endpoint
 ```
 
@@ -89,55 +119,73 @@ Open http://localhost:30080. After about 10 s, `make status` should show only `b
 `0/1` are expected: they fail the `/leader` probe on purpose. This also means
 `kubectl rollout status statefulset/bully` never finishes, so don't wait on it.
 
+Pod `bully-N` is Bully node N, so `bully-3` (node 3) is the leader when all pods are up.
+
 ```sh
-kubectl logs bully-3      # ends with "bully: NORMAL: coordinator of nodes [1, 2, 3]"
-kubectl logs -f bully-2   # follow a follower's view of the election
+kubectl logs bully-3                        # ends with "bully: NORMAL: coordinator of nodes [1, 2, 3]"
+kubectl logs -f bully-2                     # follow a node's view of the election
+kubectl get pods -l app=fortune-cookie -w   # live pod status (Ctrl+C to stop)
 ```
 
 Use the NodePort URL, not `kubectl port-forward`: port-forward sticks to one pod and doesn't
 follow a failover.
 
-### Kill the leader
+### Stop a node
 
 There are two ways, and they show different things:
 
-- **Leader crashes and comes back:** `kubectl delete pod bully-3`. `bully-2` (node 2) notices
-  within about a second and becomes leader, but Kubernetes restarts `bully-3` about 2 s after
-  the delete, and node 3 takes over again before the Service switches to `bully-2`. Users see
-  about 2 s of failed requests (the page shows "Electing a new leader… retry n") and then node 3
-  again. `kubectl logs bully-2` shows the short-lived election.
-- **Leader stays down:** `kubectl scale statefulset bully --replicas=2` removes `bully-3`.
-  About 3 s later `bully-2` is the only Ready pod and the page's badge shows node 2.
-  `kubectl scale statefulset bully --replicas=3` brings `bully-3` back, and it takes over again.
-  (`BULLY_N` stays 3, so the nodes keep treating node 3 as a member that is down.)
+- **A node crashes and comes back:** `kubectl delete pod bully-N` (any node). The pod stops at
+  once and Kubernetes recreates it under the same name about 2 s later.
+  - Leader (`kubectl delete pod bully-3`): `bully-2` (node 2) notices within about a second
+    and becomes leader, but `bully-3` is back before the Service switches to `bully-2`, and
+    node 3 takes over again. Users see about 2 s of failed requests (the page shows
+    "Electing a new leader… retry n") and then node 3 again. `kubectl logs bully-2` shows the
+    short-lived election.
+  - Follower (`bully-1` or `bully-2`): users notice nothing; `kubectl logs -f bully-3` shows
+    the leader finding the node missing and the node rejoining.
+- **A node stays down:** scale the StatefulSet down. This always removes the highest-numbered
+  pods, so it can keep `bully-3` (or `bully-3` and `bully-2`) down, but not `bully-1` or
+  `bully-2` alone.
+
+  ```sh
+  kubectl scale statefulset bully --replicas=2   # stops bully-3: about 3 s later bully-2 serves
+  kubectl scale statefulset bully --replicas=1   # also stops bully-2: bully-1 serves
+  kubectl scale statefulset bully --replicas=3   # brings them back; bully-3 takes over again
+  ```
+
+  `BULLY_N` stays 3, so the remaining nodes treat the missing ones as crashed.
+
+Sending a signal from inside a pod (e.g. `kubectl exec bully-2 -- kill -STOP 1`) does not
+work: the app is process 1 in its container, and Linux ignores such signals for process 1.
 
 ### Change the code
 
-After a code change, rebuild, load and restart the pods:
+After a code change, rebuild and restart the pods:
 
 ```sh
-make build load redeploy   # redeploy = kubectl delete pod -l app=fortune-cookie
+make build redeploy        # Docker Desktop
+make build load redeploy   # kind
 ```
 
-Don't rely on `kubectl rollout restart` or a changed image tag: a StatefulSet rolling update
-waits for each new pod to become Ready, so it stalls at the first follower.
+`redeploy` is `kubectl delete pod -l app=fortune-cookie`. Don't rely on
+`kubectl rollout restart` or a changed image tag: a StatefulSet rolling update waits for each
+new pod to become Ready, so it stalls at the first follower.
 
 ### Clean up
 
 ```sh
 make undeploy         # remove the Services, StatefulSet and the pods' state volumes
-make cluster-delete   # delete the kind cluster
+make cluster-delete   # kind only: delete the kind cluster
 ```
+
+On Docker Desktop you can also untick **Enable Kubernetes** to stop the cluster for good.
 
 ### Other clusters
 
-Any cluster needs Kubernetes 1.28 or newer: the StatefulSet numbers its pods from 1
-(`ordinals.start`) and reads each pod's number from the `apps.kubernetes.io/pod-index` label.
-
-With Docker Desktop's built-in Kubernetes (Settings → Kubernetes → Enable, kubeadm mode),
-skip `make cluster` and `make load`: it uses Docker's images directly, and the site is at
-http://localhost:30080. With minikube, use `minikube image load fortune-cookie` instead of
-`make load`, and `minikube service fortune-web --url` for the address.
+The StatefulSet numbers its pods from 1 (`ordinals.start`) and reads each pod's number from
+the `apps.kubernetes.io/pod-index` label, which needs Kubernetes 1.28 or newer. With minikube,
+use `minikube image load fortune-cookie` instead of `make load`, and
+`minikube service fortune-web --url` for the address.
 
 ## Commands
 
@@ -145,11 +193,11 @@ http://localhost:30080. With minikube, use `minikube image load fortune-cookie` 
 make install          # pip install -e '.[dev]'  (inside the activated .venv)
 make test             # run all tests
 make build            # docker build -t fortune-cookie .
-make cluster          # create the kind cluster "fortune"
-make load             # copy the image into the kind cluster
+make cluster          # create the kind cluster "fortune" (kind only)
+make load             # copy the image into the kind cluster (kind only)
 make deploy           # kubectl apply -k deploy/k8s
 make status           # pods and the leader endpoint
-make redeploy         # restart all pods (after make build load)
+make redeploy         # restart all pods (after make build, and make load on kind)
 make undeploy         # remove the deployment and its volumes
-make cluster-delete   # delete the kind cluster
+make cluster-delete   # delete the kind cluster (kind only)
 ```
