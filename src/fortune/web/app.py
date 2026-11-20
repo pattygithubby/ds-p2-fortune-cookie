@@ -29,7 +29,7 @@ NO_STORE = {"Cache-Control": "no-store"}   # every answer must come from the cur
 
 def create_app(fortunes: FortuneSource, election: LeaderElection) -> web.Application:
     """Build the web application. Dependencies are passed in so tests can use fakes."""
-    pod = socket.gethostname()   # the pod name on Kubernetes, e.g. bully-2
+    pod = socket.gethostname()   # the pod name on Kubernetes, e.g. bully-3
     static_dir = Path(str(STATIC_DIR))
 
     def not_leader() -> web.Response:

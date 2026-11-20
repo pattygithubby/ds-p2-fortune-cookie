@@ -8,7 +8,7 @@
      a server. Fortunes come from the list below with 10–40 ms latency.
      Every 5th request starts a simulated failover: about 4 s of network
      errors and 503 "not the leader" replies, after which the leader
-     changes 3 → 2 → 3 … (pods bully-2 / bully-1).
+     changes 3 → 2 → 3 … (pods bully-3 / bully-2).
      ================================================================== */
   var DEMO = new URLSearchParams(location.search).has("demo");
 
@@ -30,7 +30,7 @@
       "Today is a good day to replicate your happiness across every zone.",
       "The bug you seek lives in the last thing you deployed."
     ];
-    var PODS = { 3: "bully-2", 2: "bully-1" };
+    var PODS = { 3: "bully-3", 2: "bully-2" };
     var leader = 3;
     var requests = 0;
     var downUntil = 0;

@@ -1,4 +1,7 @@
-# Pod bully-<ordinal> is Bully node <ordinal + 1> (see src/bully/__main__.py).
+# Pods are numbered from 1 (ordinals.start), so pod bully-N is Bully node N:
+# bully-1, bully-2, bully-3 are nodes 1, 2, 3. BULLY_ID is set from the pod-index label
+# rather than left to the bully library, which would read the host name as ordinal + 1.
+# Needs Kubernetes 1.28+ (start ordinals and the pod-index label are on by default).
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -6,6 +9,8 @@ metadata:
 spec:
   serviceName: bully
   replicas: 3
+  ordinals:
+    start: 1              # pods bully-1 .. bully-3 instead of bully-0 .. bully-2
   podManagementPolicy: Parallel
   selector:
     matchLabels:
@@ -24,10 +29,14 @@ spec:
               value: "8080"
             - name: BULLY_ALGORITHM
               value: improved
+            - name: BULLY_ID      # 1, 2, 3: the N in the pod name bully-N
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['apps.kubernetes.io/pod-index']
             - name: BULLY_N
               value: "3"          # must equal replicas
-            - name: BULLY_PEERS
-              value: "bully-{ord}.bully:9000"
+            - name: BULLY_PEERS     # node N is reached at bully-N.bully:9000
+              value: "bully-{id}.bully:9000"
           ports:
             - name: http
               containerPort: 8080

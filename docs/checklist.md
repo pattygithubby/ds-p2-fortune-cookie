@@ -74,21 +74,21 @@ Goal: three pods, one leader, and only the leader receiving web traffic.
 
 - [x] Deploy: `kubectl apply -k deploy/k8s` (`make deploy`). `kubectl rollout status` never
       finishes, because followers are never Ready; use `make status` instead
-- [x] Check that only `bully-2` (node 3) is Ready:
-      `kubectl get pods -l app=fortune-cookie` shows `1/1` only for `bully-2`, and
+- [x] Check that only `bully-3` (node 3) is Ready:
+      `kubectl get pods -l app=fortune-cookie` shows `1/1` only for `bully-3`, and
       `kubectl get endpoints fortune-web` lists a single IP
-- [x] Check the election in the logs: `kubectl logs bully-2` ends with
+- [x] Check the election in the logs: `kubectl logs bully-3` ends with
       `bully: NORMAL: coordinator of nodes [1, 2, 3]`
 - [x] Open the site at the NodePort URL. Don't use `kubectl port-forward`: it attaches to one
       pod and never follows a failover
 - [x] Manual failover, tried on kind on 20 November 2026:
-  - `kubectl delete pod bully-2`: `bully-1` won the election about 1.1 s after the delete,
-    but kind restarted `bully-2` about 2.1 s after the delete and node 3 took over again
-    before the readiness probe marked `bully-1` Ready. Clients saw about 2.1 s of failures,
+  - `kubectl delete pod bully-3`: `bully-2` won the election about 1.1 s after the delete,
+    but kind restarted `bully-3` about 2.1 s after the delete and node 3 took over again
+    before the readiness probe marked `bully-2` Ready. Clients saw about 2.1 s of failures,
     then node 3. **For experiment 2 this means the delete case measures "detect + restart",
     not a takeover by node 2.**
   - `kubectl scale statefulset bully --replicas=2` (leader stays down): about 3.2 s of
-    failures, then `bully-1` (node 2) was the only Ready pod and served everything.
+    failures, then `bully-2` (node 2) was the only Ready pod and served everything.
     Scaling back to 3 handed leadership back to node 3.
   - Consider measuring both cases in experiment 2.
 - [x] In `CLAUDE.md`, replace "probe is commented out until the endpoint exists" with the
@@ -122,7 +122,7 @@ Goal: how long the election takes, and how long users wait.
   - keep polling for about 60 s, so the second takeover is recorded too
   - finally save `kubectl logs --timestamps <pod>` of every pod, so the server log times
     can be lined up with the client times
-- [ ] Measure from the pod logs (on the node that wins, e.g. `bully-1`):
+- [ ] Measure from the pod logs (on the node that wins, e.g. `bully-2`):
   - detection: delete → `-> AreYouThere to node 3: no answer`
   - election: detection → `NORMAL: coordinator of nodes [1, 2]`
   - expected limits: detection ≤ check interval (2 s) + T (1 s); election ≈ T + 2 round trips
@@ -130,15 +130,15 @@ Goal: how long the election takes, and how long users wait.
   - user-visible gap: last 200 from node 3 → first 200 from node 2
   - number of failed requests (status 0 or 503)
 - [ ] Repeat 5 times (`failover-run{1..5}.csv`); report the mean and min/max of each time
-- [ ] Describe the second takeover after `bully-2` restarts: its timing, and whether any
-      503s appear while `bully-1` is still in the Service's endpoints
+- [ ] Describe the second takeover after `bully-3` restarts: its timing, and whether any
+      503s appear while `bully-2` is still in the Service's endpoints
 - [ ] Plot one run: time on the x axis, one dot per request, colored by status/leader, with
       the delete marked; save as `experiments/results/failover-run1.png`
 - [ ] Write the measured times into `failover-timeline.drawio` next to the expected limits
 - [ ] Optional: repeat with `BULLY_ALGORITHM=original` (set in `statefulset.yaml`, redeploy)
       and compare election times
 - [ ] Optional: compare a graceful delete with a crash
-      (`kubectl delete pod bully-2 --grace-period=0 --force`)
+      (`kubectl delete pod bully-3 --grace-period=0 --force`)
 
 ## 5. Report
 
@@ -149,7 +149,7 @@ Goal: how long the election takes, and how long users wait.
 - [ ] Sections:
   - [ ] Introduction and requirements
   - [ ] Architecture and design decisions: StatefulSet instead of Deployment (stable pod
-        names give stable Bully ids: `bully-N` is node N+1), headless Service with
+        names give stable Bully ids: `bully-N` is node N, with `ordinals.start: 1`), headless Service with
         `publishNotReadyAddresses` (followers must be reachable for the election even though
         they are never Ready), readiness probe on `/leader` routing traffic to the leader
         only, followers answering 503
@@ -162,7 +162,7 @@ Goal: how long the election takes, and how long users wait.
 - [ ] Limitations to mention:
   - [ ] Failover time = detection + election + readiness probe + endpoint update, not only
         the election
-  - [ ] A restarted `bully-2` causes a second leader change (highest id always wins)
+  - [ ] A restarted `bully-3` causes a second leader change (highest id always wins)
   - [ ] Only the leader serves, so adding replicas adds fault tolerance but no capacity
   - [ ] Reloading the page during a failover shows an error; only fetching a fortune retries
   - [ ] The election uses UDP, which can lose packets; a lost reply looks like a crash

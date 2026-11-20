@@ -1,5 +1,5 @@
 # Peer discovery for the Bully election: gives every pod a stable DNS name,
-# bully-<ordinal>.bully. publishNotReadyAddresses keeps followers (which are never
+# bully-N.bully (N = 1, 2, 3). publishNotReadyAddresses keeps followers (which are never
 # ready, see the readiness probe) reachable by the other nodes.
 apiVersion: v1
 kind: Service

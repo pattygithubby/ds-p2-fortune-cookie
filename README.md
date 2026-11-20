@@ -23,8 +23,8 @@ fails, the others elect a new one. The assignment is in [docs/assignment.md](doc
 ## How it works
 
 Every pod runs the same app: a Bully node (UDP 9000) in a background thread and an aiohttp
-web server (port 8080). Pod `bully-N` of the StatefulSet is Bully node N+1, so `bully-2`
-(node 3) leads when all three pods are up.
+web server (port 8080). Pod `bully-N` of the StatefulSet is Bully node N (pods are numbered from 1), so
+`bully-3` (node 3) leads when all three pods are up.
 
 | Route | Leader | Follower |
 |---|---|---|
@@ -35,7 +35,7 @@ web server (port 8080). Pod `bully-N` of the StatefulSet is Bully node N+1, so `
 
 On Kubernetes, each pod has a readiness probe on `/leader`, so only the leader is Ready and
 the `fortune-web` Service (NodePort 30080) sends all traffic to it. The headless Service
-`bully` gives the pods their election addresses (`bully-<n>.bully:9000`) and keeps
+`bully` gives the pods their election addresses (`bully-N.bully:9000`) and keeps
 followers reachable even though they are never Ready.
 
 The page retries failed requests for up to 15 s, so a failover shows as a short wait.
@@ -84,14 +84,14 @@ make deploy    # kubectl apply -k deploy/k8s
 make status    # pods and the web Service's endpoint
 ```
 
-Open http://localhost:30080. After about 10 s, `make status` should show only `bully-2` as
+Open http://localhost:30080. After about 10 s, `make status` should show only `bully-3` as
 `1/1` Ready, the other two `0/1`, and `fortune-web` with a single endpoint. Followers that are
 `0/1` are expected: they fail the `/leader` probe on purpose. This also means
 `kubectl rollout status statefulset/bully` never finishes, so don't wait on it.
 
 ```sh
-kubectl logs bully-2      # ends with "bully: NORMAL: coordinator of nodes [1, 2, 3]"
-kubectl logs -f bully-1   # follow a follower's view of the election
+kubectl logs bully-3      # ends with "bully: NORMAL: coordinator of nodes [1, 2, 3]"
+kubectl logs -f bully-2   # follow a follower's view of the election
 ```
 
 Use the NodePort URL, not `kubectl port-forward`: port-forward sticks to one pod and doesn't
@@ -101,14 +101,14 @@ follow a failover.
 
 There are two ways, and they show different things:
 
-- **Leader crashes and comes back:** `kubectl delete pod bully-2`. `bully-1` (node 2) notices
-  within about a second and becomes leader, but Kubernetes restarts `bully-2` about 2 s after
-  the delete, and node 3 takes over again before the Service switches to `bully-1`. Users see
+- **Leader crashes and comes back:** `kubectl delete pod bully-3`. `bully-2` (node 2) notices
+  within about a second and becomes leader, but Kubernetes restarts `bully-3` about 2 s after
+  the delete, and node 3 takes over again before the Service switches to `bully-2`. Users see
   about 2 s of failed requests (the page shows "Electing a new leader… retry n") and then node 3
-  again. `kubectl logs bully-1` shows the short-lived election.
-- **Leader stays down:** `kubectl scale statefulset bully --replicas=2` removes `bully-2`.
-  About 3 s later `bully-1` is the only Ready pod and the page's badge shows node 2.
-  `kubectl scale statefulset bully --replicas=3` brings `bully-2` back, and it takes over again.
+  again. `kubectl logs bully-2` shows the short-lived election.
+- **Leader stays down:** `kubectl scale statefulset bully --replicas=2` removes `bully-3`.
+  About 3 s later `bully-2` is the only Ready pod and the page's badge shows node 2.
+  `kubectl scale statefulset bully --replicas=3` brings `bully-3` back, and it takes over again.
   (`BULLY_N` stays 3, so the nodes keep treating node 3 as a member that is down.)
 
 ### Change the code
@@ -130,6 +130,9 @@ make cluster-delete   # delete the kind cluster
 ```
 
 ### Other clusters
+
+Any cluster needs Kubernetes 1.28 or newer: the StatefulSet numbers its pods from 1
+(`ordinals.start`) and reads each pod's number from the `apps.kubernetes.io/pod-index` label.
 
 With Docker Desktop's built-in Kubernetes (Settings → Kubernetes → Enable, kubeadm mode),
 skip `make cluster` and `make load`: it uses Docker's images directly, and the site is at
